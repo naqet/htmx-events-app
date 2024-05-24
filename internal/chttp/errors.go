@@ -1,6 +1,7 @@
 package chttp
 
 import (
+	"log/slog"
 	"net/http"
 )
 
@@ -43,6 +44,7 @@ func withErrorHandling(f HandlerFunc) http.HandlerFunc {
 		err := f(w, r)
 
 		if err != nil {
+            slog.Error(err.Error())
 			switch e := err.(type) {
 			case HttpError:
 				http.Error(w, e.Error(), e.Status())
