@@ -1,25 +1,26 @@
 package main
 
 import (
-	"htmx-events-app/services/logger"
+	"htmx-events-app/db"
+	"htmx-events-app/handlers"
+	"htmx-events-app/internal/chttp"
+	"htmx-events-app/middlewares"
 	"net/http"
 )
 
 func main() {
-	mux := http.NewServeMux()
+    db.Init()
 
-	log := logger.NewLogger()
+	app := chttp.New()
 
-	mux.Handle("/{$}", log.Middleware(func(w http.ResponseWriter, r *http.Request) {
+	app.HandleFunc("/{$}", func(w http.ResponseWriter, r *http.Request) error {
 		w.Write([]byte("Hello World"))
-	}))
+		return nil
+	})
 
-	mux.Handle("/health", log.Middleware(func(w http.ResponseWriter, r *http.Request) {
-        w.WriteHeader(http.StatusOK)
-        w.Write([]byte(http.StatusText(http.StatusOK)))
-	}))
+    app.Handle("/health", handlers.NewHealthHandler())
 
-	mux.Handle("/", log.Middleware(http.NotFound))
+	app.Use(middlewares.Logger)
 
-	http.ListenAndServe("localhost:3000", mux)
+	app.Listen("localhost:3000")
 }
