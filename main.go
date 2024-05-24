@@ -1,6 +1,8 @@
 package main
 
 import (
+	"errors"
+	"fmt"
 	"htmx-events-app/db"
 	"htmx-events-app/handlers"
 	"htmx-events-app/internal/chttp"
@@ -9,7 +11,7 @@ import (
 )
 
 func main() {
-    database := db.Init()
+	database := db.Init()
 
 	app := chttp.New()
 
@@ -18,12 +20,15 @@ func main() {
 		return nil
 	})
 
-    app.Handle("/health", handlers.NewHealthHandler())
-    app.Handle("/auth", handlers.NewAuthHandler(database))
+	app.Handle("/health", handlers.NewHealthHandler())
+	app.Handle("/auth", handlers.NewAuthHandler(database))
 
 	app.Use(middlewares.Logger)
 
-	app.Listen("localhost:3000")
+	err := app.Listen("localhost:3000")
 
-    http.ListenAndServe("localhost:3000", app)
+	if err != nil && !errors.Is(err, http.ErrServerClosed) {
+		panic(err)
+	}
+    fmt.Println("Server stopped")
 }
