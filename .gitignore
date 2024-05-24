@@ -1,3 +1,6 @@
 tmp/
 .env
+node_modules/
+package-lock.json
+*_templ.go
 

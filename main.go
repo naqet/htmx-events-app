@@ -15,10 +15,7 @@ func main() {
 
 	app := chttp.New()
 
-	app.Get("/{$}", func(w http.ResponseWriter, r *http.Request) error {
-		w.Write([]byte("Hello World"))
-		return nil
-	})
+    app.Handle("/static", http.FileServer(http.Dir("./static")))
 
 	app.Handle("/health", handlers.NewHealthHandler())
 	app.Handle("/auth", handlers.NewAuthHandler(database))

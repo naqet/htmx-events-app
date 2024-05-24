@@ -1,0 +1,9 @@
+{
+  "name": "htmx-events-app",
+  "version": "1.0.0",
+  "author": "naqet",
+  "license": "MIT",
+  "devDependencies": {
+    "tailwindcss": "^3.4.3"
+  }
+}

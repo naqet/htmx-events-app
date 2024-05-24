@@ -1,0 +1,33 @@
+package views;
+
+import "htmx-events-app/views/layout"
+
+templ SignUpPage() {
+	@vlayout.Base() {
+		<div class="grid place-items-center h-dvh p-4">
+			<form
+				class="border rounded-md grid gap-2 p-4 w-full max-w-sm"
+				hx-ext="response-targets, json-enc"
+				hx-trigger="submit"
+				hx-swap="innerHTML"
+				hx-post="/auth/signup"
+				hx-target-error="#errors"
+			>
+				<div class="grid">
+					<label for="name">Name</label>
+					<input type="name" id="name" name="name" autocomplete="name"/>
+				</div>
+				<div class="grid">
+					<label for="email">Email</label>
+					<input type="email" id="email" name="email" autocomplete="email"/>
+				</div>
+				<div class="grid">
+					<label for="password">Password</label>
+					<input type="password" id="password" name="password" autocomplete="current-password"/>
+				</div>
+				<button>Submit</button>
+				<div id="errors" class="empty:hidden text-red-300"></div>
+			</form>
+		</div>
+	}
+}
