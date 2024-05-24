@@ -23,9 +23,9 @@ func NewAuthHandler(db *gorm.DB) http.Handler {
 	route := chttp.New()
 	auth := authHandler{db}
 
-	route.HandleFunc("POST /login", auth.login)
-	route.HandleFunc("POST /signup", auth.signUp)
-	route.HandleFunc("POST /logout", auth.login)
+	route.Post("/login", auth.login)
+	route.Post("/signup", auth.signUp)
+	route.Post("/logout", auth.login)
 
 	return route
 }

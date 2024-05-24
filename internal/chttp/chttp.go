@@ -1,6 +1,7 @@
 package chttp
 
 import (
+	"fmt"
 	"net/http"
 )
 
@@ -37,8 +38,24 @@ func (a *app) Use(middle Middleware) {
 	a.middlewares = append(a.middlewares, middle)
 }
 
-func (a *app) HandleFunc(path string, f HandlerFunc) {
-	a.mux.HandleFunc(a.path+path, withErrorHandling(f))
+func (a *app) Get(path string, f HandlerFunc) {
+    pattern := fmt.Sprintf("GET %s", a.path + path)
+	a.mux.HandleFunc(pattern, withErrorHandling(f))
+}
+
+func (a *app) Post(path string, f HandlerFunc) {
+    pattern := fmt.Sprintf("POST %s", a.path + path)
+	a.mux.HandleFunc(pattern, withErrorHandling(f))
+}
+
+func (a *app) Put(path string, f HandlerFunc) {
+    pattern := fmt.Sprintf("PUT %s", a.path + path)
+	a.mux.HandleFunc(pattern, withErrorHandling(f))
+}
+
+func (a *app) Delete(path string, f HandlerFunc) {
+    pattern := fmt.Sprintf("DELETE %s", a.path + path)
+	a.mux.HandleFunc(pattern, withErrorHandling(f))
 }
 
 func (a *app) Listen(addr string) error {

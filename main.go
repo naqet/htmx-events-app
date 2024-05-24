@@ -13,7 +13,7 @@ func main() {
 
 	app := chttp.New()
 
-	app.HandleFunc("/{$}", func(w http.ResponseWriter, r *http.Request) error {
+	app.Get("/{$}", func(w http.ResponseWriter, r *http.Request) error {
 		w.Write([]byte("Hello World"))
 		return nil
 	})

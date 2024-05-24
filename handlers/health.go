@@ -11,7 +11,7 @@ func NewHealthHandler() http.Handler {
 	app := chttp.New()
     h := healthHandler{}
 
-	app.HandleFunc("/", h.healthy)
+	app.Get("/", h.healthy)
 
 	return app
 }
