@@ -41,21 +41,6 @@ func (a *app) HandleFunc(path string, f HandlerFunc) {
 	a.mux.HandleFunc(a.path+path, withErrorHandling(f))
 }
 
-func withErrorHandling(f HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		err := f(w, r)
-
-		if err != nil {
-			switch e := err.(type) {
-			case HttpError:
-				http.Error(w, e.Error(), e.Status())
-			default:
-				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-			}
-		}
-	}
-}
-
 func (a *app) Listen(addr string) error {
 	var handler http.Handler = a.mux
 	for _, middleware := range a.middlewares {

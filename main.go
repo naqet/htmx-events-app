@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-    db.Init()
+    database := db.Init()
 
 	app := chttp.New()
 
@@ -19,8 +19,11 @@ func main() {
 	})
 
     app.Handle("/health", handlers.NewHealthHandler())
+    app.Handle("/auth", handlers.NewAuthHandler(database))
 
 	app.Use(middlewares.Logger)
 
 	app.Listen("localhost:3000")
+
+    http.ListenAndServe("localhost:3000", app)
 }
