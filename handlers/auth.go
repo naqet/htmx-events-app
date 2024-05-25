@@ -5,7 +5,7 @@ import (
 	"htmx-events-app/db"
 	"htmx-events-app/internal/chttp"
 	"htmx-events-app/utils"
-	"htmx-events-app/views/auth"
+	vauth "htmx-events-app/views/auth"
 	"net/http"
 	"os"
 	"time"
@@ -20,9 +20,9 @@ type authHandler struct {
 	db *gorm.DB
 }
 
-func NewAuthHandler(db *gorm.DB) http.Handler {
-	route := chttp.New()
-	auth := authHandler{db}
+func NewAuthHandler(app *chttp.App) {
+	route := app.Group("/auth")
+	auth := authHandler{app.DB}
 
     route.Get("/login", auth.loginPage)
     route.Get("/signup", auth.signUpPage)
@@ -30,16 +30,14 @@ func NewAuthHandler(db *gorm.DB) http.Handler {
 	route.Post("/login", auth.login)
 	route.Post("/signup", auth.signUp)
 	route.Post("/logout", auth.login)
-
-	return route
 }
 
 func (h *authHandler) loginPage(w http.ResponseWriter, r *http.Request) error {
-    return views.LoginPage().Render(r.Context(), w)
+    return vauth.LoginPage().Render(r.Context(), w)
 }
 
 func (h *authHandler) signUpPage(w http.ResponseWriter, r *http.Request) error {
-    return views.SignUpPage().Render(r.Context(), w)
+    return vauth.SignUpPage().Render(r.Context(), w)
 }
 
 func (h *authHandler) login(w http.ResponseWriter, r *http.Request) error {

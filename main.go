@@ -12,18 +12,17 @@ import (
 
 func main() {
 	database := db.Init()
-
-	app := chttp.New()
-
-    app.Handle("/static", http.FileServer(http.Dir("./static")))
-
-	app.Handle("/health", handlers.NewHealthHandler())
-	app.Handle("/auth", handlers.NewAuthHandler(database))
+	app := chttp.New(database)
 
 	app.Use(middlewares.Logger)
 
-	err := app.Listen("localhost:3000")
+    app.Handle("/static", http.FileServer(http.Dir("./static")))
 
+    handlers.NewHealthHandler(app)
+    handlers.NewAuthHandler(app)
+    handlers.NewDashboardHandler(app)
+
+	err := app.Listen("localhost:3000")
 	if err != nil && !errors.Is(err, http.ErrServerClosed) {
 		panic(err)
 	}

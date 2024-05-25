@@ -5,15 +5,13 @@ import (
 	"net/http"
 )
 
-type healthHandler struct { }
+type healthHandler struct{}
 
-func NewHealthHandler() http.Handler {
-	app := chttp.New()
-    h := healthHandler{}
+func NewHealthHandler(app *chttp.App) {
+	route := app.Group("/health")
+	h := healthHandler{}
 
-	app.Get("/", h.healthy)
-
-	return app
+	route.Get("/", h.healthy)
 }
 
 func (h *healthHandler) healthy(w http.ResponseWriter, r *http.Request) error {

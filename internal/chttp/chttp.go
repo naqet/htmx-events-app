@@ -3,65 +3,75 @@ package chttp
 import (
 	"fmt"
 	"net/http"
+
+	"gorm.io/gorm"
 )
 
 type HandlerFunc = func(w http.ResponseWriter, r *http.Request) error
-type Middleware = func(next http.Handler) http.Handler
+type Middleware = func(next http.Handler, path string) HandlerFunc
 
-type app struct {
+type App struct {
 	path        string
 	mux         *http.ServeMux
-	middlewares []Middleware
+	middlewares *map[string][]Middleware
+    DB *gorm.DB
 }
 
-func New() *app {
-    return &app{path: "", mux: http.NewServeMux()}
+func New(db *gorm.DB) *App {
+    return &App{
+        path: "",
+        mux: http.NewServeMux(),
+        middlewares: &map[string][]Middleware{},
+        DB: db,
+    }
 }
 
-func (a app) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (a App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	a.mux.ServeHTTP(w, r)
 }
 
-func (a *app) Handle(path string, handler http.Handler) {
+func (a *App) Handle(path string, handler http.Handler) {
 	a.mux.Handle(a.path+path+"/", http.StripPrefix(a.path+path, handler))
 }
 
-func (a *app) Group(path string) *app {
-	return &app{
+func (a *App) Group(path string) *App {
+	return &App{
 		path:        a.path + path,
 		mux:         a.mux,
 		middlewares: a.middlewares,
 	}
 }
 
-func (a *app) Use(middle Middleware) {
-	a.middlewares = append(a.middlewares, middle)
+func (a *App) Use(middle Middleware) {
+    (*a.middlewares)[a.path] = append((*a.middlewares)[a.path], middle)
 }
 
-func (a *app) Get(path string, f HandlerFunc) {
+func (a *App) Get(path string, f HandlerFunc) {
     pattern := fmt.Sprintf("GET %s", a.path + path)
 	a.mux.HandleFunc(pattern, withErrorHandling(f))
 }
 
-func (a *app) Post(path string, f HandlerFunc) {
+func (a *App) Post(path string, f HandlerFunc) {
     pattern := fmt.Sprintf("POST %s", a.path + path)
 	a.mux.HandleFunc(pattern, withErrorHandling(f))
 }
 
-func (a *app) Put(path string, f HandlerFunc) {
+func (a *App) Put(path string, f HandlerFunc) {
     pattern := fmt.Sprintf("PUT %s", a.path + path)
 	a.mux.HandleFunc(pattern, withErrorHandling(f))
 }
 
-func (a *app) Delete(path string, f HandlerFunc) {
+func (a *App) Delete(path string, f HandlerFunc) {
     pattern := fmt.Sprintf("DELETE %s", a.path + path)
 	a.mux.HandleFunc(pattern, withErrorHandling(f))
 }
 
-func (a *app) Listen(addr string) error {
+func (a *App) Listen(addr string) error {
 	var handler http.Handler = a.mux
-	for _, middleware := range a.middlewares {
-		handler = middleware(handler)
+	for path, middlewares := range *a.middlewares {
+        for _, middleware := range middlewares {
+            handler = withErrorHandling(middleware(handler, path))
+        }
 	}
 	return http.ListenAndServe(addr, handler)
 }

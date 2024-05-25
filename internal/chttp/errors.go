@@ -39,6 +39,14 @@ func BadRequestError(args ...string) StatusError {
 	return StatusError{http.StatusBadRequest, msg}
 }
 
+func UnauthorizedError(args ...string) StatusError {
+    msg := http.StatusText(http.StatusUnauthorized)
+    if len(args) == 1 {
+        msg = args[0]
+    }
+	return StatusError{http.StatusUnauthorized, msg}
+}
+
 func withErrorHandling(f HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		err := f(w, r)
