@@ -48,13 +48,13 @@ func Auth(next http.Handler, path string) chttp.HandlerFunc {
 				return chttp.UnauthorizedError("Invalid JWT token")
 			}
 
-            id, ok := claims["id"].(string)
+            email, err := claims.GetSubject()
 
-			if !ok {
+			if err != nil {
 				return chttp.UnauthorizedError("Invalid JWT token")
 			}
 
-			ctx := context.WithValue(r.Context(), "id", id)
+			ctx := context.WithValue(r.Context(), "email", email)
 
 			next.ServeHTTP(w, r.WithContext(ctx))
             return nil

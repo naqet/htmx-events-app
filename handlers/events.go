@@ -21,8 +21,28 @@ func NewEventsHandler(app *chttp.App) {
 	route := app.Group("/events")
 	h := eventsHandler{app.DB}
 
-    route.Use(middlewares.Auth)
+	route.Use(middlewares.Auth)
+	route.Get("/{id}", h.getById)
 	route.Post("/{$}", h.createEvent)
+}
+
+func (h *eventsHandler) getById(w http.ResponseWriter, r *http.Request) error {
+	id := r.PathValue("id")
+
+	var event db.Event
+	err := h.db.Preload("Owners", func(tx *gorm.DB) *gorm.DB {
+		//TODO: create fix for that in the gorm REPO
+		return tx.Select("Email")
+	}).Where("id = ?", id).First(&event).Error
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return chttp.NotFoundError("Event with such ID doesn't exist")
+	} else if err != nil {
+		return err
+	}
+
+	err = utils.WriteJson(w, event)
+	return err
 }
 
 func (h *eventsHandler) createEvent(w http.ResponseWriter, r *http.Request) error {
@@ -43,46 +63,43 @@ func (h *eventsHandler) createEvent(w http.ResponseWriter, r *http.Request) erro
 		return chttp.BadRequestError()
 	}
 
-	senderUserId, ok := r.Context().Value("id").(string)
+	email, ok := r.Context().Value("email").(string)
 
-	if !ok || senderUserId == "" {
-		return fmt.Errorf("Senders userID couldn't be obtained from the request")
+	if !ok || email == "" {
+		return fmt.Errorf("Senders email couldn't be obtained from the request")
 	}
 
-    var user db.User
+	err = h.db.Where("title = ?", data.Title).First(&db.Event{}).Error
 
-    err = h.db.Where("id = ?", senderUserId).First(&user).Error
+	if err == nil {
+		return chttp.BadRequestError("Event with this title already exists")
+	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
+		return err
+	}
 
-    if err != nil {
-        return err
-    }
+	var owners []*db.User
+	for _, email := range data.AdditionalOwners {
+		owners = append(owners, &db.User{Email: email})
+	}
 
-    err = h.db.Where("title = ?", data.Title).First(&db.Event{}).Error
+    owners = append(owners, &db.User{Email: email})
 
-    if err == nil {
-        return chttp.BadRequestError("Event with this title already exists")
-    }
+	event := db.Event{
+		Title:       data.Title,
+		Description: data.Description,
+		Place:       data.Place,
+		StartDate:   data.StartDate,
+		EndDate:     data.EndDate,
+		Owners:      owners,
+	}
 
-    if !errors.Is(err, gorm.ErrRecordNotFound) {
-        return err
-    }
+	err = h.db.Create(&event).Error
 
-    var owners []*db.User
+	if err != nil {
+		return err
+	}
 
-    for _, email := range data.AdditionalOwners {
-        owners = append(owners, &db.User{Email: email})
-    }
+	w.Write([]byte(event.ID))
 
-    event := db.Event{
-    	Title:       data.Title,
-    	Description: data.Description,
-    	Place:       data.Place,
-    	StartDate:   data.StartDate,
-    	EndDate:     data.EndDate,
-    	Owners:      owners,
-    }
-
-    err = h.db.Create(&event).Error
-
-	return err
+	return nil
 }

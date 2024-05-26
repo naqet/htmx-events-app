@@ -31,6 +31,14 @@ func NewError(code int, msg string) StatusError {
 	return StatusError{code, msg}
 }
 
+func NotFoundError(args ...string) StatusError {
+    msg := http.StatusText(http.StatusNotFound)
+    if len(args) == 1 {
+        msg = args[0]
+    }
+	return StatusError{http.StatusNotFound, msg}
+}
+
 func BadRequestError(args ...string) StatusError {
     msg := http.StatusText(http.StatusBadRequest)
     if len(args) == 1 {

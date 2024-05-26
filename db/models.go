@@ -29,11 +29,11 @@ type User struct {
 
 type Event struct {
 	Base
-	Title        string    `json:"title" gorm:"unique:not null;check:title <> ''"`
-	Description  string    `json:"description"`
-    // TODO: think about changing it to Place type with proper model and mock data
-	Place        string    `json:"place"`
-	StartDate    time.Time `json:"startDate"`
-	EndDate      time.Time `json:"endDate"`
-	Owners       []*User   `json:"owners" gorm:"many2many:owned_events"`
+	Title       string `json:"title" gorm:"unique:not null;check:title <> ''"`
+	Description string `json:"description"`
+	// TODO: think about changing it to Place type with proper model and mock data
+	Place     string    `json:"place"`
+	StartDate time.Time `json:"startDate"`
+	EndDate   time.Time `json:"endDate"`
+    Owners    []*User   `json:"owners" gorm:"many2many:owned_events;References:Email"`
 }

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"htmx-events-app/internal/chttp"
 	"io"
+	"net/http"
 )
 
 func GetDataFromBody(body io.Reader, dst any) error {
@@ -19,5 +20,17 @@ func GetDataFromBody(body io.Reader, dst any) error {
 		return chttp.BadRequestError()
 	}
 
+    return nil
+}
+
+func WriteJson(w http.ResponseWriter, value any) error {
+	data, err := json.Marshal(value)
+
+	if err != nil {
+		return err
+	}
+
+	w.Header().Add("Content-Type", "application/json")
+	w.Write(data)
     return nil
 }

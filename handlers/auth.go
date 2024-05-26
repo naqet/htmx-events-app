@@ -71,7 +71,6 @@ func (h *authHandler) login(w http.ResponseWriter, r *http.Request) error {
 	expiration := time.Now().Add(time.Hour)
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-        "id": user.ID,
 		"sub":  user.Email,
 		"time": expiration.Unix(),
 	})
