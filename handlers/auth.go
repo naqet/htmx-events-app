@@ -24,8 +24,8 @@ func NewAuthHandler(app *chttp.App) {
 	route := app.Group("/auth")
 	auth := authHandler{app.DB}
 
-    route.Get("/login", auth.loginPage)
-    route.Get("/signup", auth.signUpPage)
+	route.Get("/login", auth.loginPage)
+	route.Get("/signup", auth.signUpPage)
 
 	route.Post("/login", auth.login)
 	route.Post("/signup", auth.signUp)
@@ -33,11 +33,11 @@ func NewAuthHandler(app *chttp.App) {
 }
 
 func (h *authHandler) loginPage(w http.ResponseWriter, r *http.Request) error {
-    return vauth.LoginPage().Render(r.Context(), w)
+	return vauth.LoginPage().Render(r.Context(), w)
 }
 
 func (h *authHandler) signUpPage(w http.ResponseWriter, r *http.Request) error {
-    return vauth.SignUpPage().Render(r.Context(), w)
+	return vauth.SignUpPage().Render(r.Context(), w)
 }
 
 func (h *authHandler) login(w http.ResponseWriter, r *http.Request) error {
@@ -71,11 +71,16 @@ func (h *authHandler) login(w http.ResponseWriter, r *http.Request) error {
 	expiration := time.Now().Add(time.Hour)
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+        "id": user.ID,
 		"sub":  user.Email,
 		"time": expiration.Unix(),
 	})
 
 	secret := os.Getenv("SECRET")
+
+	if secret == "" {
+		return errors.New("JWT secret is not set")
+	}
 
 	tokenString, err := token.SignedString([]byte(secret))
 
@@ -94,7 +99,8 @@ func (h *authHandler) login(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	http.SetCookie(w, &cookie)
-    w.Write([]byte(http.StatusText(http.StatusOK)))
+    w.Header().Add("HX-Redirect", "/dashboard")
+	w.Write([]byte(http.StatusText(http.StatusOK)))
 
 	return nil
 }

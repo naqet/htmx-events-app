@@ -39,6 +39,14 @@ func BadRequestError(args ...string) StatusError {
 	return StatusError{http.StatusBadRequest, msg}
 }
 
+func InternalServerError(args ...string) StatusError {
+    msg := http.StatusText(http.StatusInternalServerError)
+    if len(args) == 1 {
+        msg = args[0]
+    }
+	return StatusError{http.StatusInternalServerError, msg}
+}
+
 func UnauthorizedError(args ...string) StatusError {
     msg := http.StatusText(http.StatusUnauthorized)
     if len(args) == 1 {

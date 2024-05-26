@@ -4,7 +4,7 @@ tmp_dir = "tmp"
 
 [build]
   args_bin = []
-  bin = "./tmp/main -r"
+  bin = "./tmp/main"
   cmd = "make"
   delay = 1000
   exclude_dir = ["public", "tmp", "vendor", "testdata", "node_modules", "static"]

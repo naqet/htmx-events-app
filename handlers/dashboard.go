@@ -15,7 +15,7 @@ func NewDashboardHandler(app *chttp.App){
 
     route.Use(middlewares.Auth)
 
-    route.Get("/", h.homePage)
+    route.Get("/{$}", h.homePage)
 }
 
 func (h *dashboardHandler) homePage(w http.ResponseWriter, r *http.Request) error {

@@ -14,16 +14,16 @@ type App struct {
 	path        string
 	mux         *http.ServeMux
 	middlewares *map[string][]Middleware
-    DB *gorm.DB
+	DB          *gorm.DB
 }
 
 func New(db *gorm.DB) *App {
-    return &App{
-        path: "",
-        mux: http.NewServeMux(),
-        middlewares: &map[string][]Middleware{},
-        DB: db,
-    }
+	return &App{
+		path:        "",
+		mux:         http.NewServeMux(),
+		middlewares: &map[string][]Middleware{},
+		DB:          db,
+	}
 }
 
 func (a App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -43,35 +43,51 @@ func (a *App) Group(path string) *App {
 }
 
 func (a *App) Use(middle Middleware) {
-    (*a.middlewares)[a.path] = append((*a.middlewares)[a.path], middle)
+	(*a.middlewares)[a.path] = append((*a.middlewares)[a.path], middle)
 }
 
 func (a *App) Get(path string, f HandlerFunc) {
-    pattern := fmt.Sprintf("GET %s", a.path + path)
+	if a.path != "/" {
+		path = a.path + path
+	}
+
+	pattern := fmt.Sprintf("GET %s", path)
 	a.mux.HandleFunc(pattern, withErrorHandling(f))
 }
 
 func (a *App) Post(path string, f HandlerFunc) {
-    pattern := fmt.Sprintf("POST %s", a.path + path)
+	if a.path != "/" {
+		path = a.path + path
+	}
+
+	pattern := fmt.Sprintf("POST %s", path)
 	a.mux.HandleFunc(pattern, withErrorHandling(f))
 }
 
 func (a *App) Put(path string, f HandlerFunc) {
-    pattern := fmt.Sprintf("PUT %s", a.path + path)
+	if a.path != "/" {
+		path = a.path + path
+	}
+
+	pattern := fmt.Sprintf("PUT %s", path)
 	a.mux.HandleFunc(pattern, withErrorHandling(f))
 }
 
 func (a *App) Delete(path string, f HandlerFunc) {
-    pattern := fmt.Sprintf("DELETE %s", a.path + path)
+	if a.path != "/" {
+		path = a.path + path
+	}
+
+	pattern := fmt.Sprintf("DELETE %s", path)
 	a.mux.HandleFunc(pattern, withErrorHandling(f))
 }
 
 func (a *App) Listen(addr string) error {
 	var handler http.Handler = a.mux
 	for path, middlewares := range *a.middlewares {
-        for _, middleware := range middlewares {
-            handler = withErrorHandling(middleware(handler, path))
-        }
+		for _, middleware := range middlewares {
+			handler = withErrorHandling(middleware(handler, path))
+		}
 	}
 	return http.ListenAndServe(addr, handler)
 }
