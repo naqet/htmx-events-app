@@ -31,6 +31,7 @@ func Init() *gorm.DB {
 
 	db.AutoMigrate(
 		&User{},
+        &Event{},
 	)
 
     return db

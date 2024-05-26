@@ -23,6 +23,7 @@ func main() {
 	handlers.NewHealthHandler(app)
 	handlers.NewAuthHandler(app)
 	handlers.NewDashboardHandler(app)
+	handlers.NewEventsHandler(app)
 
 	err := app.Listen("localhost:3000")
 	if err != nil && !errors.Is(err, http.ErrServerClosed) {

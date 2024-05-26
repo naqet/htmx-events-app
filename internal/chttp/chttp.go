@@ -1,9 +1,7 @@
 package chttp
 
 import (
-	"fmt"
 	"net/http"
-
 	"gorm.io/gorm"
 )
 
@@ -47,38 +45,22 @@ func (a *App) Use(middle Middleware) {
 }
 
 func (a *App) Get(path string, f HandlerFunc) {
-	if a.path != "/" {
-		path = a.path + path
-	}
-
-	pattern := fmt.Sprintf("GET %s", path)
+    pattern := resolvePattern(a.path, path, "GET")
 	a.mux.HandleFunc(pattern, withErrorHandling(f))
 }
 
 func (a *App) Post(path string, f HandlerFunc) {
-	if a.path != "/" {
-		path = a.path + path
-	}
-
-	pattern := fmt.Sprintf("POST %s", path)
+    pattern := resolvePattern(a.path, path, "POST")
 	a.mux.HandleFunc(pattern, withErrorHandling(f))
 }
 
 func (a *App) Put(path string, f HandlerFunc) {
-	if a.path != "/" {
-		path = a.path + path
-	}
-
-	pattern := fmt.Sprintf("PUT %s", path)
+    pattern := resolvePattern(a.path, path, "PUT")
 	a.mux.HandleFunc(pattern, withErrorHandling(f))
 }
 
 func (a *App) Delete(path string, f HandlerFunc) {
-	if a.path != "/" {
-		path = a.path + path
-	}
-
-	pattern := fmt.Sprintf("DELETE %s", path)
+    pattern := resolvePattern(a.path, path, "DELETE")
 	a.mux.HandleFunc(pattern, withErrorHandling(f))
 }
 
