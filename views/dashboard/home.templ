@@ -26,6 +26,9 @@ templ Page() {
 						<li>
 							<a href="/reports">Reports</a>
 						</li>
+						<li>
+							<button hx-post="/auth/logout">Log out</button>
+						</li>
 					</ul>
 				</nav>
 			</header>
@@ -34,6 +37,7 @@ templ Page() {
 					hx-post="/events"
 					hx-trigger="submit"
 					hx-ext="json-enc"
+                    hx-swap="none"
 					class="p-4 rounded-md grid gap-2 max-w-sm bg-gray-300"
 				>
 					<h3 class="text-lg font-bold text-center">Create new event</h3>

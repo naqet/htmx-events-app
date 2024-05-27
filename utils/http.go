@@ -34,3 +34,11 @@ func WriteJson(w http.ResponseWriter, value any) error {
 	w.Write(data)
     return nil
 }
+
+func IsHtmxRequest(r *http.Request) bool {
+    return r.Header.Get("HX-Request") != ""
+}
+
+func AddHtmxRedirect(w http.ResponseWriter, path string) {
+    w.Header().Add("HX-Redirect", path)
+}

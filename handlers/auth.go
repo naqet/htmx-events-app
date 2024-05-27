@@ -29,7 +29,7 @@ func NewAuthHandler(app *chttp.App) {
 
 	route.Post("/login", auth.login)
 	route.Post("/signup", auth.signUp)
-	route.Post("/logout", auth.login)
+	route.Post("/logout", auth.logOut)
 }
 
 func (h *authHandler) loginPage(w http.ResponseWriter, r *http.Request) error {
@@ -98,7 +98,11 @@ func (h *authHandler) login(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	http.SetCookie(w, &cookie)
-    w.Header().Add("HX-Redirect", "/dashboard")
+
+	if utils.IsHtmxRequest(r) {
+		utils.AddHtmxRedirect(w, "/dashboard")
+	}
+
 	w.Write([]byte(http.StatusText(http.StatusOK)))
 
 	return nil
@@ -136,6 +140,31 @@ func (h *authHandler) signUp(w http.ResponseWriter, r *http.Request) error {
 
 	if err != nil {
 		return err
+	}
+
+	if utils.IsHtmxRequest(r) {
+		utils.AddHtmxRedirect(w, "/auth/login")
+	}
+
+	w.Write([]byte(http.StatusText(http.StatusOK)))
+	return nil
+}
+
+func (h *authHandler) logOut(w http.ResponseWriter, r *http.Request) error {
+	cookie := http.Cookie{
+		Name:     "Authorization",
+		Value:    "",
+		Path:     "/",
+		MaxAge:   -1,
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
+	}
+
+    http.SetCookie(w, &cookie)
+
+	if utils.IsHtmxRequest(r) {
+		utils.AddHtmxRedirect(w, "/")
 	}
 
 	w.Write([]byte(http.StatusText(http.StatusOK)))

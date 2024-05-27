@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"htmx-events-app/db"
 	"htmx-events-app/internal/chttp"
+	"htmx-events-app/internal/toast"
 	"htmx-events-app/middlewares"
 	"htmx-events-app/utils"
 	"net/http"
@@ -96,6 +97,10 @@ func (h *eventsHandler) createEvent(w http.ResponseWriter, r *http.Request) erro
 
 	if err != nil {
 		return err
+	}
+
+	if utils.IsHtmxRequest(r) {
+		toast.AddToast(w, toast.SUCCESS, "Event has been added")
 	}
 
 	w.Write([]byte(event.ID))

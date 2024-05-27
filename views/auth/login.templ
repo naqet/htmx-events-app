@@ -13,15 +13,15 @@ templ LoginPage() {
 				hx-post="/auth/login"
 				hx-target-error="#errors"
 			>
-				<div class="grid">
-					<label for="email">Email</label>
-					<input type="email" id="email" name="email" autocomplete="email"/>
-				</div>
-				<div class="grid">
-					<label for="password">Password</label>
-					<input type="password" id="password" name="password" autocomplete="current-password"/>
-				</div>
-				<button>Submit</button>
+				<label class="grid">
+					Email
+					<input type="email" id="email" name="email" autocomplete="email" class="border p-2"/>
+				</label>
+				<label class="grid">
+					Password
+					<input type="password" id="password" name="password" autocomplete="current-password" class="border p-2"/>
+				</label>
+				<button class="py-2 px-4 bg-gray-500 text-white rounded-md">Submit</button>
 				<div id="errors" class="empty:hidden text-red-300"></div>
 			</form>
 		</div>
