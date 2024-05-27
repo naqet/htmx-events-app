@@ -30,8 +30,7 @@ func (h *eventsHandler) getById(w http.ResponseWriter, r *http.Request) error {
 	id := r.PathValue("id")
 
 	var event db.Event
-	err := h.db.Preload("Owners", func(tx *gorm.DB) *gorm.DB {
-		//TODO: create fix for that in the gorm REPO
+	err := h.db.Preload("Hosts", func(tx *gorm.DB) *gorm.DB {
 		return tx.Select("Email")
 	}).Where("id = ?", id).First(&event).Error
 
@@ -47,12 +46,12 @@ func (h *eventsHandler) getById(w http.ResponseWriter, r *http.Request) error {
 
 func (h *eventsHandler) createEvent(w http.ResponseWriter, r *http.Request) error {
 	type request struct {
-		Title            string    `json:"title"`
-		Description      string    `json:"description"`
-		Place            string    `json:"place"`
-		StartDate        time.Time `json:"startDate"`
-		EndDate          time.Time `json:"endDate"`
-		AdditionalOwners []string  `json:"additionalOwners"`
+		Title       string    `json:"title"`
+		Description string    `json:"description"`
+		Place       string    `json:"place"`
+		StartDate   time.Time `json:"startDate"`
+		EndDate     time.Time `json:"endDate"`
+		Hosts       []string  `json:"hosts"`
 	}
 
 	var data request
@@ -77,12 +76,12 @@ func (h *eventsHandler) createEvent(w http.ResponseWriter, r *http.Request) erro
 		return err
 	}
 
-	var owners []*db.User
-	for _, email := range data.AdditionalOwners {
-		owners = append(owners, &db.User{Email: email})
+	var hosts []*db.User
+	for _, email := range data.Hosts {
+		hosts = append(hosts, &db.User{Email: email})
 	}
 
-    owners = append(owners, &db.User{Email: email})
+	hosts = append(hosts, &db.User{Email: email})
 
 	event := db.Event{
 		Title:       data.Title,
@@ -90,7 +89,7 @@ func (h *eventsHandler) createEvent(w http.ResponseWriter, r *http.Request) erro
 		Place:       data.Place,
 		StartDate:   data.StartDate,
 		EndDate:     data.EndDate,
-		Owners:      owners,
+		Hosts:       hosts,
 	}
 
 	err = h.db.Create(&event).Error

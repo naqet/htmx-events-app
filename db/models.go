@@ -24,7 +24,7 @@ type User struct {
 	Email             string   `json:"email" gorm:"unique"`
 	Password          string   `json:"password"`
 	PasswordConfirmed bool     `json:"passwordConfirmed" gorm:"default:false"`
-	OwnedEvents       []*Event `json:"ownedEvents" gorm:"many2many:owned_events"`
+	HostedEvents       []*Event `json:"hostedEvents" gorm:"many2many:hosted_events"`
 }
 
 type Event struct {
@@ -35,5 +35,5 @@ type Event struct {
 	Place     string    `json:"place"`
 	StartDate time.Time `json:"startDate"`
 	EndDate   time.Time `json:"endDate"`
-    Owners    []*User   `json:"owners" gorm:"many2many:owned_events;References:Email"`
+	Hosts     []*User   `json:"Hosts" gorm:"many2many:hosted_events;References:Email"`
 }

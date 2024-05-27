@@ -19,5 +19,5 @@ func NewDashboardHandler(app *chttp.App){
 }
 
 func (h *dashboardHandler) homePage(w http.ResponseWriter, r *http.Request) error {
-    return vdashboard.HomePage().Render(r.Context(), w)
+    return vdashboard.Page().Render(r.Context(), w)
 }

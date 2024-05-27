@@ -1,9 +1,66 @@
 package vdashboard;
 
 import "htmx-events-app/views/layout"
+import "htmx-events-app/db"
 
-templ HomePage() {
+var users = []db.User{
+	{Email: "test@gmail.com", Name: "Testing Account"},
+	{Email: "another@gmail.com", Name: "Another one"},
+	{Email: "helloWorld@gmail.com", Name: "Hello World User"},
+}
+
+templ Page() {
 	@vlayout.Base() {
-		<main class="font-bold">Hello World from Home Page</main>
+		<div class="p-4 grid gap-4">
+			<header class="flex justify-between">
+				// TODO update logo
+				<div class="w-8 h-8 rounded-sm bg-gray-300"></div>
+				<nav>
+					<ul class="flex gap-10">
+						<li>
+							<a href="/dashboard">Dashboard</a>
+						</li>
+						<li>
+							<a href="/events">Events</a>
+						</li>
+						<li>
+							<a href="/reports">Reports</a>
+						</li>
+					</ul>
+				</nav>
+			</header>
+			<main class="w-full">
+				<form
+					hx-post="/events"
+					hx-trigger="submit"
+					hx-ext="json-enc"
+					class="p-4 rounded-md grid gap-2 max-w-sm bg-gray-300"
+				>
+					<h3 class="text-lg font-bold text-center">Create new event</h3>
+					<label class="grid">
+						Title
+						<input name="title" class="p-1"/>
+					</label>
+					<label class="grid">
+						Description
+						<textarea name="description" rows="3" class="p-1"></textarea>
+					</label>
+					<label class="grid">
+						Place
+						<input name="place" class="p-1"/>
+					</label>
+					<label class="grid">
+						Hosts
+						<select name="hosts" class="p-1" multiple>
+							for _, user := range users {
+								<option value={ user.Email }>{ user.Name }</option>
+							}
+						</select>
+						<small class="mt-1">User creating the event is added as host by default</small>
+					</label>
+					<button class="py-2 px-4 bg-gray-500 text-white rounded-md">Submit</button>
+				</form>
+			</main>
+		</div>
 	}
 }
