@@ -2,13 +2,7 @@ package vevents;
 
 import "htmx-events-app/db"
 import "time"
-
-func getFirstLetter(name string) string {
-	if len(name) == 0 {
-		return ""
-	}
-	return string(name[0])
-}
+import "fmt"
 
 templ Table(events []db.Event) {
 	<div class="m-4 p-2 border rounded-md overflow-x-scroll">
@@ -24,25 +18,35 @@ templ Table(events []db.Event) {
 				</tr>
 			</thead>
 			<tbody>
-				for _, event := range events {
-					<tr class="border-b last:border-none">
-						<td class="p-4 align-middle">
-							<a class="font-medium hover:underline" href="#">{ event.Title }</a>
-						</td>
-						<td class="p-4 max-w-xl truncate">
-							{ event.Description }
-						</td>
-						<td class="p-4">{ event.Place }</td>
-						<td class="p-4">{ event.StartDate.Format(time.DateOnly) }</td>
-						<td class="p-4">{ event.EndDate.Format(time.DateOnly) }</td>
-						<td class="p-4">
-							<ul class="flex items-center space-x-2">
-								for _, host := range event.Hosts {
-									<li class="rounded-full h-8 w-8 grid place-items-center bg-gray-200">{ getFirstLetter(host.Name) }</li>
-								}
-							</ul>
-						</td>
-					</tr>
+				if len(events) > 0 {
+					for _, event := range events {
+						<tr class="border-b last:border-none">
+							<td class="p-4 align-middle">
+								<a class="font-medium hover:underline" href={ templ.URL(fmt.Sprintf("/events/%s", event.Title)) }>
+									{ event.Title }
+								</a>
+							</td>
+							<td class="p-4 max-w-xl truncate">
+								{ event.Description }
+							</td>
+							<td class="p-4">{ event.Place }</td>
+							<td class="p-4">{ event.StartDate.Format(time.DateOnly) }</td>
+							<td class="p-4">{ event.EndDate.Format(time.DateOnly) }</td>
+							<td class="p-4">
+								<ul class="flex items-center space-x-2">
+									for _, host := range event.Hosts {
+										<li class="rounded-full h-8 w-8 grid place-items-center bg-gray-200">
+											{ getFirstLetter(host.Name) }
+										</li>
+									}
+								</ul>
+							</td>
+						</tr>
+					}
+				} else {
+					<tr>
+                        <td class="text-center text-black/70 p-4" colspan="6">No events</td>
+                    </tr>
 				}
 			</tbody>
 		</table>

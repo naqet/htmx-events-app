@@ -1,0 +1,60 @@
+package vevents;
+
+import "htmx-events-app/views/layout"
+import "htmx-events-app/db"
+import "time"
+
+templ Details(event db.Event) {
+	@vlayout.Base() {
+		@vlayout.Header()
+		<div class="p-4 gap-20 lg:flex justify-center grid">
+			<section class="grid gap-4 h-fit">
+				<h1 class="text-4xl font-bold">{ event.Title }</h1>
+				<p class="max-w-md text-black/70">{ event.Description }</p>
+				<ul class="grid gap-2">
+					<li class="grid">
+						Date
+						<span class="text-black/70">
+							{ event.StartDate.Format(time.DateOnly) }
+						</span>
+					</li>
+					<li class="grid">
+						Location
+						<span class="text-black/70">{ event.Place }</span>
+					</li>
+                    <li>
+                        Hosts
+                        <ul>
+                            for _, host := range event.Hosts {
+                                <li class="rounded-full h-8 w-8 grid place-items-center bg-gray-200">
+                                    { getFirstLetter(host.Name) }
+                                </li>
+                            }
+                        </ul>
+                    </li>
+				</ul>
+				<div>
+					<button class="rounded-md bg-black px-4 py-2 text-white hover:bg-black/70 focus-within:bg-black/70">
+						Confirm attendance
+					</button>
+				</div>
+			</section>
+			<section class="grid gap-2 h-fit">
+				<h2 class="font-semibold text-2xl">Agenda</h2>
+				<p class="text-black/70">Check out the schedule of events and plan your day.</p>
+				<ul class="grid gap-6">
+					for range 5 {
+						<li class="flex items-center gap-4">
+							<small class="rounded-full bg-black text-white px-5 py-1 text-xs">Time</small>
+							<div>
+								<h3>Welcome</h3>
+								<p class="text-black/70">Join us as we kick off the event and set the tone for the day.</p>
+							</div>
+							->
+						</li>
+					}
+				</ul>
+			</section>
+		</div>
+	}
+}

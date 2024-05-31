@@ -9,7 +9,6 @@ import (
 	"htmx-events-app/utils"
 	vevents "htmx-events-app/views/events"
 	"net/http"
-	"time"
 
 	"gorm.io/gorm"
 )
@@ -24,7 +23,7 @@ func NewEventsHandler(app *chttp.App) {
 
 	route.Use(middlewares.Auth)
 	route.Get("/", h.homePage)
-	route.Get("/{id}", h.getById)
+	route.Get("/{title}", h.getById)
 	route.Post("/{$}", h.createEvent)
 }
 
@@ -40,9 +39,7 @@ func (h *eventsHandler) homePage(w http.ResponseWriter, r *http.Request) error {
 		Joins("JOIN hosted_events ON hosted_events.event_id = events.id").
 		Joins("JOIN users ON users.email = hosted_events.user_email").
 		Where("users.email = ?", email).
-		Preload("Hosts", func(tx *gorm.DB) *gorm.DB {
-			return tx.Select("Name", "Email")
-		}).Find(&events).
+		Preload("Hosts").Find(&events).
 		Error
 
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -53,12 +50,10 @@ func (h *eventsHandler) homePage(w http.ResponseWriter, r *http.Request) error {
 }
 
 func (h *eventsHandler) getById(w http.ResponseWriter, r *http.Request) error {
-	id := r.PathValue("id")
+	title := r.PathValue("title")
 
 	var event db.Event
-	err := h.db.Preload("Hosts", func(tx *gorm.DB) *gorm.DB {
-		return tx.Select("Email")
-	}).Where("id = ?", id).First(&event).Error
+	err := h.db.Preload("Hosts").Where("title = ?", title).First(&event).Error
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return chttp.NotFoundError("Event with such ID doesn't exist")
@@ -66,18 +61,17 @@ func (h *eventsHandler) getById(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	err = utils.WriteJson(w, event)
-	return err
+	return vevents.Details(event).Render(r.Context(), w)
 }
 
 func (h *eventsHandler) createEvent(w http.ResponseWriter, r *http.Request) error {
 	type request struct {
-		Title       string    `json:"title"`
-		Description string    `json:"description"`
-		Place       string    `json:"place"`
-		StartDate   time.Time `json:"startDate"`
-		EndDate     time.Time `json:"endDate"`
-		Hosts       []string  `json:"hosts"`
+		Title       string     `json:"title"`
+		Description string     `json:"description"`
+		Place       string     `json:"place"`
+		StartDate   utils.Time `json:"startDate"`
+		EndDate     utils.Time `json:"endDate"`
+		Hosts       []string   `json:"hosts"`
 	}
 
 	var data request
@@ -113,8 +107,8 @@ func (h *eventsHandler) createEvent(w http.ResponseWriter, r *http.Request) erro
 		Title:       data.Title,
 		Description: data.Description,
 		Place:       data.Place,
-		StartDate:   data.StartDate,
-		EndDate:     data.EndDate,
+		StartDate:   data.StartDate.Time,
+		EndDate:     data.EndDate.Time,
 		Hosts:       hosts,
 	}
 
