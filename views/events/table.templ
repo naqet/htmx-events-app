@@ -1,0 +1,50 @@
+package vevents;
+
+import "htmx-events-app/db"
+import "time"
+
+func getFirstLetter(name string) string {
+	if len(name) == 0 {
+		return ""
+	}
+	return string(name[0])
+}
+
+templ Table(events []db.Event) {
+	<div class="m-4 p-2 border rounded-md overflow-x-scroll">
+		<table class="w-full caption-bottom text-sm min-w-[1200px]">
+			<thead>
+				<tr class="border-b h-12 text-left [&>th]:px-4">
+					<th>Title </th>
+					<th>Description </th>
+					<th>Place </th>
+					<th>Start Date </th>
+					<th>End Date </th>
+					<th>Hosts </th>
+				</tr>
+			</thead>
+			<tbody>
+				for _, event := range events {
+					<tr class="border-b last:border-none">
+						<td class="p-4 align-middle">
+							<a class="font-medium hover:underline" href="#">{ event.Title }</a>
+						</td>
+						<td class="p-4 max-w-xl truncate">
+							{ event.Description }
+						</td>
+						<td class="p-4">{ event.Place }</td>
+						<td class="p-4">{ event.StartDate.Format(time.DateOnly) }</td>
+						<td class="p-4">{ event.EndDate.Format(time.DateOnly) }</td>
+						<td class="p-4">
+							<ul class="flex items-center space-x-2">
+								for _, host := range event.Hosts {
+									<li class="rounded-full h-8 w-8 grid place-items-center bg-gray-200">{ getFirstLetter(host.Name) }</li>
+								}
+							</ul>
+						</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	</div>
+}

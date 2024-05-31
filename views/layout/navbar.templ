@@ -1,0 +1,24 @@
+package vlayout;
+
+templ Header() {
+	<header class="flex justify-between p-4">
+		// TODO update logo
+		<div class="w-8 h-8 rounded-sm bg-gray-300"></div>
+		<nav>
+			<ul class="flex gap-10">
+				<li>
+					<a href="/dashboard">Dashboard</a>
+				</li>
+				<li>
+					<a href="/events">Events</a>
+				</li>
+				<li>
+					<a href="/reports">Reports</a>
+				</li>
+				<li>
+					<button hx-post="/auth/logout">Log out</button>
+				</li>
+			</ul>
+		</nav>
+	</header>
+}

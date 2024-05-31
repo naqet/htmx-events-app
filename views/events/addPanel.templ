@@ -1,0 +1,44 @@
+package vevents;
+
+import "htmx-events-app/db"
+
+var users = []db.User{
+	{Email: "test@gmail.com", Name: "Testing Account"},
+	{Email: "another@gmail.com", Name: "Another one"},
+	{Email: "helloWorld@gmail.com", Name: "Hello World User"},
+}
+ 
+templ AddPanel() {
+	<form
+		hx-post="/events"
+		hx-trigger="submit"
+		hx-ext="json-enc"
+		hx-swap="none"
+        hx-on::after-request="if(event.detail.successful) this.reset()"
+		class="p-4 rounded-md grid gap-2 max-w-sm bg-gray-300 h-fit"
+	>
+		<h3 class="text-lg font-bold text-center">Create new event</h3>
+		<label class="grid">
+			Title
+			<input name="title" class="p-1"/>
+		</label>
+		<label class="grid">
+			Description
+			<textarea name="description" rows="3" class="p-1"></textarea>
+		</label>
+		<label class="grid">
+			Place
+			<input name="place" class="p-1"/>
+		</label>
+		<label class="grid">
+			Hosts
+			<select name="hosts" class="p-1" multiple>
+				for _, user := range users {
+					<option value={ user.Email }>{ user.Name }</option>
+				}
+			</select>
+			<small class="mt-1">User creating the event is added as host by default</small>
+		</label>
+		<button class="py-2 px-4 bg-gray-500 text-white rounded-md">Submit</button>
+	</form>
+}

@@ -24,7 +24,7 @@ type User struct {
 	Email             string   `json:"email" gorm:"unique"`
 	Password          string   `json:"password"`
 	PasswordConfirmed bool     `json:"passwordConfirmed" gorm:"default:false"`
-	HostedEvents       []*Event `json:"hostedEvents" gorm:"many2many:hosted_events"`
+	HostedEvents      []*Event `json:"hostedEvents" gorm:"many2many:hosted_events"`
 }
 
 type Event struct {

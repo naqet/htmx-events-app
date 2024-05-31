@@ -2,12 +2,12 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
 	"htmx-events-app/db"
 	"htmx-events-app/internal/chttp"
 	"htmx-events-app/internal/toast"
 	"htmx-events-app/middlewares"
 	"htmx-events-app/utils"
+	vevents "htmx-events-app/views/events"
 	"net/http"
 	"time"
 
@@ -23,8 +23,33 @@ func NewEventsHandler(app *chttp.App) {
 	h := eventsHandler{app.DB}
 
 	route.Use(middlewares.Auth)
+	route.Get("/", h.homePage)
 	route.Get("/{id}", h.getById)
 	route.Post("/{$}", h.createEvent)
+}
+
+func (h *eventsHandler) homePage(w http.ResponseWriter, r *http.Request) error {
+	email, err := utils.GetEmailFromContext(r)
+
+	if err != nil {
+		return err
+	}
+
+	var events []db.Event
+	err = h.db.
+		Joins("JOIN hosted_events ON hosted_events.event_id = events.id").
+		Joins("JOIN users ON users.email = hosted_events.user_email").
+		Where("users.email = ?", email).
+		Preload("Hosts", func(tx *gorm.DB) *gorm.DB {
+			return tx.Select("Name", "Email")
+		}).Find(&events).
+		Error
+
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return err
+	}
+
+	return vevents.Page(events).Render(r.Context(), w)
 }
 
 func (h *eventsHandler) getById(w http.ResponseWriter, r *http.Request) error {
@@ -63,10 +88,10 @@ func (h *eventsHandler) createEvent(w http.ResponseWriter, r *http.Request) erro
 		return chttp.BadRequestError()
 	}
 
-	email, ok := r.Context().Value("email").(string)
+	email, err := utils.GetEmailFromContext(r)
 
-	if !ok || email == "" {
-		return fmt.Errorf("Senders email couldn't be obtained from the request")
+	if err != nil {
+		return err
 	}
 
 	err = h.db.Where("title = ?", data.Title).First(&db.Event{}).Error

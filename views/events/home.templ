@@ -1,0 +1,12 @@
+package vevents
+
+import "htmx-events-app/views/layout"
+import "htmx-events-app/db"
+
+templ Page(events []db.Event) {
+	@vlayout.Base() {
+        @vlayout.Header()
+        <h1 class="p-4 text-xl font-bold">Events</h1>
+        @Table(events)
+	}
+}
