@@ -1,0 +1,19 @@
+package vwelcome;
+
+import "htmx-events-app/views/components"
+
+templ Header() {
+<header class="flex justify-between p-4">
+    @vcomponents.Logo("/")
+    <nav>
+        <ul class="flex gap-10">
+            <li>
+                <a href="/auth/login">Login</a>
+            </li>
+            <li>
+                <a href="/auth/signup">Sign up</a>
+            </li>
+        </ul>
+    </nav>
+</header>
+}

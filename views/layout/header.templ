@@ -1,9 +1,10 @@
 package vlayout;
 
+import "htmx-events-app/views/components"
+
 templ Header() {
 	<header class="flex justify-between p-4">
-		// TODO update logo
-		<div class="w-8 h-8 rounded-sm bg-gray-300"></div>
+        @vcomponents.Logo("/dashboard")
 		<nav>
 			<ul class="flex gap-10">
 				<li>

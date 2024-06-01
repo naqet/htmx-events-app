@@ -34,7 +34,7 @@ templ (m Multiselect) UI() {
 			{ m.Attr... }
 			name="hosts"
 			id={ resultsId }
-			class="absolute bg-white border top-[110%] p-2 pr-4 hidden rounded group-focus-within:grid hover:grid gap-2 max-h-52 min-w-60 overflow-y-scroll"
+			class="absolute z-50 bg-white border top-[110%] p-2 pr-4 hidden rounded group-focus-within:grid hover:grid gap-2 max-h-52 min-w-60 overflow-y-scroll"
 		>
 			@MultiselectOptions(m.Options)
 		</fieldset>

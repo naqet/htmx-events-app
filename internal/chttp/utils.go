@@ -5,7 +5,7 @@ import "fmt"
 func resolvePattern(basePath, path, method string) string {
 	pattern := path
 
-	if basePath != "/" {
+	if len(basePath) > 0 && basePath != "/" {
 		if pattern == "/{$}" {
 			pattern = basePath
 		} else {

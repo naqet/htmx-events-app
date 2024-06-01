@@ -20,6 +20,7 @@ func main() {
 
 	app.Handle("/static", http.FileServer(http.Dir("./static")))
 
+	handlers.NewWelcomeHandler(app)
 	handlers.NewHealthHandler(app)
 	handlers.NewAuthHandler(app)
 	handlers.NewDashboardHandler(app)

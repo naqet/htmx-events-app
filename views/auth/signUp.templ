@@ -1,10 +1,12 @@
 package vauth;
 
 import "htmx-events-app/views/layout"
+import "htmx-events-app/views/welcome"
 
 templ SignUpPage() {
 	@vlayout.Base() {
-		<div class="grid place-items-center h-dvh p-4">
+        @vwelcome.Header()
+		<div class="grid place-items-center p-4 absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 w-full">
 			<form
 				class="border rounded-md grid gap-2 p-4 w-full max-w-sm"
 				hx-ext="response-targets, json-enc"
