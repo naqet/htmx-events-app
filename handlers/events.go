@@ -66,12 +66,12 @@ func (h *eventsHandler) getById(w http.ResponseWriter, r *http.Request) error {
 
 func (h *eventsHandler) createEvent(w http.ResponseWriter, r *http.Request) error {
 	type request struct {
-		Title       string     `json:"title"`
-		Description string     `json:"description"`
-		Place       string     `json:"place"`
-		StartDate   utils.Time `json:"startDate"`
-		EndDate     utils.Time `json:"endDate"`
-		Hosts       []string   `json:"hosts"`
+		Title       string      `json:"title"`
+		Description string      `json:"description"`
+		Place       string      `json:"place"`
+		StartDate   utils.Time  `json:"startDate"`
+		EndDate     utils.Time  `json:"endDate"`
+		Hosts       utils.Hosts `json:"hosts"`
 	}
 
 	var data request
@@ -97,7 +97,7 @@ func (h *eventsHandler) createEvent(w http.ResponseWriter, r *http.Request) erro
 	}
 
 	var hosts []*db.User
-	for _, email := range data.Hosts {
+	for _, email := range data.Hosts.Entries {
 		hosts = append(hosts, &db.User{Email: email})
 	}
 

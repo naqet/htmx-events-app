@@ -1,0 +1,23 @@
+package vcomponents;
+
+type Option struct {
+Value string
+Label string
+Checked bool
+}
+
+templ MultiselectOptions(options []Option) {
+if len(options) > 0 {
+for _, opt := range options {
+<label class="flex gap-2 p-1 rounded hover:bg-black/10 cursor-pointer">
+    <input id={ opt.Value } type="checkbox" checked?={ opt.Checked } value={ opt.Value } name="hosts" onchange="(function(){
+                    const count = this.parentElement.parentElement.parentElement.querySelectorAll('input:checked').length
+                    this.parentElement.parentElement.parentElement.setAttribute('data-count', count)
+                }).bind(this)()" />
+    { opt.Label }
+</label>
+}
+} else {
+<div class="text-black/70 text-sm">Empty</div>
+}
+}

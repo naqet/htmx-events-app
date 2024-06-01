@@ -24,6 +24,7 @@ func main() {
 	handlers.NewAuthHandler(app)
 	handlers.NewDashboardHandler(app)
 	handlers.NewEventsHandler(app)
+	handlers.NewComponentsHandler(app)
 
 	err := app.Listen("localhost:3000")
 	if err != nil && !errors.Is(err, http.ErrServerClosed) {

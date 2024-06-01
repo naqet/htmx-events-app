@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"encoding/json"
 	"errors"
 	"time"
 )
@@ -19,5 +20,35 @@ func (t *Time) UnmarshalJSON(b []byte) error {
 		return err
 	}
 	*t = Time{val}
+	return nil
+}
+
+type Hosts struct {
+	Entries []string
+}
+
+func (h *Hosts) UnmarshalJSON(b []byte) error {
+	var raw interface{}
+
+	if err := json.Unmarshal(b, &raw); err != nil {
+		return err
+	}
+
+	switch v := raw.(type) {
+	case string:
+		h.Entries = []string{v}
+	case []interface{}:
+		for _, item := range v {
+			str, ok := item.(string)
+			if !ok {
+				return errors.New("Invalid entry in hosts")
+			}
+
+			h.Entries = append(h.Entries, str)
+		}
+	default:
+		return errors.New("Invalid hosts")
+	}
+
 	return nil
 }

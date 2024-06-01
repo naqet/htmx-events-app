@@ -24,7 +24,7 @@ templ Details(event db.Event) {
 					</li>
                     <li>
                         Hosts
-                        <ul>
+                        <ul class="flex gap-2">
                             for _, host := range event.Hosts {
                                 <li class="rounded-full h-8 w-8 grid place-items-center bg-gray-200">
                                     { getFirstLetter(host.Name) }
@@ -34,7 +34,7 @@ templ Details(event db.Event) {
                     </li>
 				</ul>
 				<div>
-					<button class="rounded-md bg-black px-4 py-2 text-white hover:bg-black/70 focus-within:bg-black/70">
+					<button class="rounded-md bg-black px-4 py-2 text-white hover:bg-black/70 focus-visible:bg-black/70">
 						Confirm attendance
 					</button>
 				</div>
