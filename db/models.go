@@ -25,6 +25,7 @@ type User struct {
 	Password          string   `json:"password"`
 	PasswordConfirmed bool     `json:"passwordConfirmed" gorm:"default:false"`
 	HostedEvents      []*Event `json:"hostedEvents" gorm:"many2many:hosted_events"`
+	AttendedEvents    []*Event `json:"attendedEvents" gorm:"many2many:attended_events"`
 }
 
 type Event struct {
@@ -36,4 +37,16 @@ type Event struct {
 	StartDate time.Time `json:"startDate"`
 	EndDate   time.Time `json:"endDate"`
 	Hosts     []*User   `json:"Hosts" gorm:"many2many:hosted_events;References:Email"`
+	Attendees []*User   `json:"Attendees" gorm:"many2many:attended_events;References:Email"`
+}
+
+type Invitation struct {
+	Base
+	From       User `gorm:"foreignKey:FromEmail;References:Email"`
+	FromEmail  string
+	To         User `gorm:"foreignKey:ToEmail;References:Email"`
+	ToEmail    string
+	Event      Event `gorm:"foreignKey:EventTitle;References:Title"`
+	EventTitle string
+	Message    string
 }

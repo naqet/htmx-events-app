@@ -16,7 +16,6 @@ func GetDataFromBody(body io.Reader, dst any) error {
 	}
 
 	err = json.Unmarshal(content, dst)
-    fmt.Println(err)
 
 	if err != nil {
 		return chttp.BadRequestError()

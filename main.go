@@ -26,6 +26,7 @@ func main() {
 	handlers.NewDashboardHandler(app)
 	handlers.NewEventsHandler(app)
 	handlers.NewComponentsHandler(app)
+	handlers.NewInvitationsHandler(app)
 
 	err := app.Listen("localhost:3000")
 	if err != nil && !errors.Is(err, http.ErrServerClosed) {

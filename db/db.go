@@ -2,6 +2,7 @@ package db
 
 import (
 	"flag"
+	"fmt"
 	"os"
 
 	"gorm.io/driver/sqlite"
@@ -18,6 +19,7 @@ func init() {
 
     if *reset {
         os.Remove("./db/sqlite.db")
+        fmt.Println("DB reseted")
     }
 }
 
@@ -35,10 +37,12 @@ func Init() *gorm.DB {
 	db.AutoMigrate(
 		&User{},
         &Event{},
+        &Invitation{},
 	)
 
     if seed {
         Seed(db)
+        fmt.Println("DB seeded")
     }
 
     return db

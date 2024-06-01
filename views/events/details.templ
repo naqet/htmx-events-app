@@ -4,7 +4,7 @@ import "htmx-events-app/views/layout"
 import "htmx-events-app/db"
 import "time"
 
-templ Details(event db.Event) {
+templ Details(event db.Event, events []db.Event) {
 	@vlayout.Base() {
 		@vlayout.Header()
 		<div class="p-4 gap-20 lg:flex justify-center grid">
@@ -33,11 +33,6 @@ templ Details(event db.Event) {
                         </ul>
                     </li>
 				</ul>
-				<div>
-					<button class="rounded-md bg-black px-4 py-2 text-white hover:bg-black/70 focus-visible:bg-black/70">
-						Confirm attendance
-					</button>
-				</div>
 			</section>
 			<section class="grid gap-2 h-fit">
 				<h2 class="font-semibold text-2xl">Agenda</h2>

@@ -52,16 +52,25 @@ func (h *eventsHandler) homePage(w http.ResponseWriter, r *http.Request) error {
 func (h *eventsHandler) getById(w http.ResponseWriter, r *http.Request) error {
 	title := r.PathValue("title")
 
-	var event db.Event
-	err := h.db.Preload("Hosts").Where("title = ?", title).First(&event).Error
+	var events []db.Event
+	err := h.db.Preload("Hosts").Find(&events).Error
 
-	if errors.Is(err, gorm.ErrRecordNotFound) {
+    var event *db.Event
+
+    for _, e := range events {
+        if e.Title == title {
+            event = &e
+            break;
+        }
+    }
+
+	if event == nil || errors.Is(err, gorm.ErrRecordNotFound) {
 		return chttp.NotFoundError("Event with such ID doesn't exist")
 	} else if err != nil {
 		return err
 	}
 
-	return vevents.Details(event).Render(r.Context(), w)
+	return vevents.Details(*event, events).Render(r.Context(), w)
 }
 
 func (h *eventsHandler) createEvent(w http.ResponseWriter, r *http.Request) error {
@@ -122,6 +131,7 @@ func (h *eventsHandler) createEvent(w http.ResponseWriter, r *http.Request) erro
 		toast.AddToast(w, toast.SUCCESS, "Event has been added")
 	}
 
+    w.WriteHeader(http.StatusCreated)
 	w.Write([]byte(event.ID))
 
 	return nil

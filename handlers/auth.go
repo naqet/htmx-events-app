@@ -146,7 +146,8 @@ func (h *authHandler) signUp(w http.ResponseWriter, r *http.Request) error {
 		utils.AddHtmxRedirect(w, "/auth/login")
 	}
 
-	w.Write([]byte(http.StatusText(http.StatusOK)))
+    w.WriteHeader(http.StatusCreated)
+	w.Write([]byte(http.StatusText(http.StatusCreated)))
 	return nil
 }
 

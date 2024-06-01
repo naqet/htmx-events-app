@@ -63,7 +63,7 @@ func seedEvents(db *gorm.DB, users []*User) {
 	for range len(users) {
         random := rand.Intn(len(users) - 1)
 		event := Event{
-			Title:       faker.Word(),
+			Title:       faker.Sentence(),
 			Description: faker.Sentence(),
 			Place:       faker.Word(),
 			StartDate:   time.Time{},
