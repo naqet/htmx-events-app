@@ -8,8 +8,11 @@ import (
 	"gorm.io/gorm"
 )
 
+var seed bool
+
 func init() {
     reset := flag.Bool("r", false, "Reset DB")
+    flag.BoolVar(&seed, "s", false, "Seed DB")
 
     flag.Parse()
 
@@ -33,6 +36,10 @@ func Init() *gorm.DB {
 		&User{},
         &Event{},
 	)
+
+    if seed {
+        Seed(db)
+    }
 
     return db
 }

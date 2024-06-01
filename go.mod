@@ -12,7 +12,9 @@ require (
 )
 
 require (
+	github.com/go-faker/faker/v4 v4.4.1 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/mattn/go-sqlite3 v1.14.22 // indirect
+	golang.org/x/text v0.15.0 // indirect
 )
