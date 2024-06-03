@@ -1,14 +1,65 @@
 package vdashboard;
 
 import "htmx-events-app/views/layout"
+import "htmx-events-app/db"
+import "time"
+import "fmt"
 
-templ Page() {
-	@vlayout.Base() {
-        @vlayout.Header()
-        <h1 class="p-4 text-xl font-bold">Dashboard</h1>
-		<div class="p-4 grid gap-4">
-			<main class="w-full">
-			</main>
-		</div>
-	}
+func resolveId(id string) string {
+return "invitation-" + id
+}
+
+templ Page(invitations []db.Invitation, hasMore bool) {
+@vlayout.Base() {
+@vlayout.Header()
+<h1 class="p-4 text-xl font-bold">Dashboard</h1>
+<div class="p-4 grid lg:grid-cols-6 gap-4">
+    <section class="border p-4 lg:col-span-2 rounded-md grid">
+        <h2 class="font-semibold text-lg">Event Invitations</h2>
+        <small class="mb-4 text-black/60">Manage your upcoming events.</small>
+        <ul class="grid peer">
+            for _, invitation := range invitations {
+            <li id={ resolveId(invitation.ID) } class="flex justify-between border-b last:border-none py-2 gap-10">
+                <div>
+                    <h3>{ invitation.Event.Title }</h3>
+                    <p class="text-sm text-black/60 flex gap-1 items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4">
+                            <path fill-rule="evenodd"
+                                d="M4 1.75a.75.75 0 0 1 1.5 0V3h5V1.75a.75.75 0 0 1 1.5 0V3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2V1.75ZM4.5 6a1 1 0 0 0-1 1v4.5a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1h-7Z"
+                                clip-rule="evenodd"></path>
+                        </svg>
+                        { invitation.Event.StartDate.Format(time.DateOnly) }
+                    </p>
+                    <p class="text-sm text-black/60">{ invitation.Message }</p>
+                </div>
+                <div class="flex gap-2 items-center text-sm">
+                    <button
+                        class="p-2 border rounded-md grid place-items-center hover:bg-green-100/50 focus-visible:bg-green-100/50"
+                        hx-post={ fmt.Sprintf("/invitations/%s/accept", invitation.ID) } hx-target={ "#" +
+                        resolveId(invitation.ID) } hx-swap="outerHTML">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
+                            <path fill-rule="evenodd"
+                                d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z"
+                                clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                    <button
+                        class="p-2 border rounded-md grid place-items-center hover:bg-red-100/50 focus-visible:bg-red-100/50"
+                        hx-post={ fmt.Sprintf("/invitations/%s/reject", invitation.ID) }
+                        hx-confirm="Are you sure you want to reject this invitation?" hx-target={ "#" + resolveId(invitation.ID)} hx-swap="outerHTML">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
+                            <path
+                                d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z">
+                            </path>
+                        </svg>
+                    </button>
+                </div>
+            </li>
+            }
+        </ul>
+        <a href="/invitations" class="peer-empty:hidden text-sm w-fit mx-auto text-black/50 pt-2">See more</a>
+        <p class="hidden text-black/50 peer-empty:block text-center text-xs">No invitations</p>
+    </section>
+</div>
+}
 }

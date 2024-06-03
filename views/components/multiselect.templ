@@ -4,9 +4,10 @@ import "github.com/satori/go.uuid"
 import "fmt"
 
 type Multiselect struct {
-	Options   []Option
-	Attr      templ.Attributes
-	InputAttr templ.Attributes
+	Options []Option
+    Name string
+	DataUrl string
+    Placeholder string
 }
 
 var randomId = uuid.NewV4().String()
@@ -23,8 +24,8 @@ templ (m Multiselect) UI() {
 			type="search"
 			name="search"
 			form="non-existent"
-			hx-post="/components/users"
-			placeholder="Begin Typing to Search Users..."
+            placeholder={ m.Placeholder }
+			hx-post={ m.DataUrl }
 			hx-trigger="input changed delay:500ms, search, revealed"
 			hx-target={ fmt.Sprintf("#%s", resultsId) }
 			hx-ext="ignore:json-enc"
@@ -32,8 +33,7 @@ templ (m Multiselect) UI() {
 			autocomplete="off"
 		/>
 		<fieldset
-			{ m.Attr... }
-			name="hosts"
+			name={ m.Name }
 			id={ resultsId }
 			class="absolute z-50 bg-white border top-[110%] p-2 pr-4 hidden rounded group-focus-within:grid hover:grid gap-2 max-h-52 min-w-60 overflow-y-scroll"
 		>

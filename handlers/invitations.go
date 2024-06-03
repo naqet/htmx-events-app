@@ -20,9 +20,20 @@ func NewInvitationsHandler(app *chttp.App) {
 	route := app.Group("/invitations")
 	h := invitationsHandler{app.DB}
 
-    route.Use(middlewares.Auth)
+	route.Use(middlewares.Auth)
 
 	route.Post("/", h.create)
+	route.Post("/{id}/accept", h.accept)
+	route.Post("/{id}/reject", h.reject)
+}
+
+// TODO: implement logic
+func (h *invitationsHandler) accept(w http.ResponseWriter, r *http.Request) error {
+	return nil
+}
+
+func (h *invitationsHandler) reject(w http.ResponseWriter, r *http.Request) error {
+	return nil
 }
 
 func (h *invitationsHandler) create(w http.ResponseWriter, r *http.Request) error {
@@ -67,17 +78,17 @@ func (h *invitationsHandler) create(w http.ResponseWriter, r *http.Request) erro
 		return err
 	}
 
-    var isHost bool
-    for _, host := range event.Hosts {
-        if host.Email == email {
-            isHost = true
-            break;
-        }
-    }
+	var isHost bool
+	for _, host := range event.Hosts {
+		if host.Email == email {
+			isHost = true
+			break
+		}
+	}
 
-    if !isHost {
-        return chttp.UnauthorizedError("Only event's hosts can send invitations")
-    }
+	if !isHost {
+		return chttp.UnauthorizedError("Only event's hosts can send invitations")
+	}
 
 	invitation := db.Invitation{
 		From:    db.User{Email: email},
