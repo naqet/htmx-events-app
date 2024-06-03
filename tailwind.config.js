@@ -5,7 +5,7 @@ module.exports = {
   theme: {
     extend: {
         colors: {
-            "secondary": colors.gray[100] + "4D"
+            "secondary": colors.stone[50]
         }
     },
   },
