@@ -7,6 +7,7 @@ import (
 	"htmx-events-app/handlers"
 	"htmx-events-app/internal/cenv"
 	"htmx-events-app/internal/chttp"
+	"htmx-events-app/internal/toast"
 	"htmx-events-app/middlewares"
 	"net/http"
 )
@@ -19,6 +20,12 @@ func main() {
 	app.Use(middlewares.Logger)
 
 	app.Handle("/static", http.FileServer(http.Dir("./static")))
+
+    app.Post("/testing", func(w http.ResponseWriter, r *http.Request) error {
+        toast.AddToast(w, toast.SUCCESS, "Testing")
+        w.Write([]byte("OK"))
+        return nil
+    })
 
 	handlers.NewWelcomeHandler(app)
 	handlers.NewHealthHandler(app)

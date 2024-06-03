@@ -46,7 +46,8 @@ templ Page(invitations []db.Invitation, hasMore bool) {
                     <button
                         class="p-2 border rounded-md grid place-items-center hover:bg-red-100/50 focus-visible:bg-red-100/50 bg-white"
                         hx-post={ fmt.Sprintf("/invitations/%s/reject", invitation.ID) }
-                        hx-confirm="Are you sure you want to reject this invitation?" hx-target={ "#" + resolveId(invitation.ID)} hx-swap="outerHTML">
+                        hx-confirm="Are you sure you want to reject this invitation?" hx-target={ "#" +
+                        resolveId(invitation.ID) } hx-swap="outerHTML">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
                             <path
                                 d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z">
@@ -58,7 +59,7 @@ templ Page(invitations []db.Invitation, hasMore bool) {
             }
         </ul>
         if hasMore {
-            <a href="/invitations" class="peer-empty:hidden text-sm w-fit mx-auto text-black/50 pt-2">See more</a>
+        <a href="/invitations" class="peer-empty:hidden text-sm w-fit mx-auto text-black/50 pt-2">See more</a>
         }
         <p class="hidden text-black/50 peer-empty:block text-center text-xs">No invitations</p>
     </section>

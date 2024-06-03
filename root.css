@@ -12,12 +12,27 @@
     }
 }
 
-input, textarea {
+@keyframes test {
+    0% {
+        opacity: 0;
+        transform: translateX(10px) scale(0.95);
+    }
+
+    100% {
+        opacity: 100;
+        transform: translateX(0) scale(1);
+    }
+}
+
+input,
+textarea {
     @apply rounded-md border p-1
 }
 
 .toast {
     @apply flex items-center p-4 rounded-lg shadow-md bg-gray-50;
+    animation-name: test;
+    animation-duration: 300ms;
 }
 
 .toast-success {
