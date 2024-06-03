@@ -199,7 +199,7 @@ func (h *invitationsHandler) createMany(w http.ResponseWriter, r *http.Request) 
 	}
 
 	var receivers []db.User
-	tx := h.db.Where("email IN ?", data.Attendees.Entries).Find(&receivers)
+	tx := h.db.Where("email IN ?", data.Attendees).Find(&receivers)
 
 	if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
 		return chttp.BadRequestError("Receivers do not exist")
@@ -209,7 +209,7 @@ func (h *invitationsHandler) createMany(w http.ResponseWriter, r *http.Request) 
 		return err
 	}
 
-	if tx.RowsAffected != int64(len(data.Attendees.Entries)) {
+	if tx.RowsAffected != int64(len(data.Attendees)) {
 		return chttp.BadRequestError("Invalid receivers list")
 	}
 

@@ -9,6 +9,7 @@ import (
 	"htmx-events-app/utils"
 	vevents "htmx-events-app/views/events"
 	"net/http"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -29,7 +30,7 @@ func NewEventsHandler(app *chttp.App) {
 }
 
 func (h *eventsHandler) createEventPage(w http.ResponseWriter, r *http.Request) error {
-    return vevents.CreateEventPage().Render(r.Context(), w)
+	return vevents.CreateEventPage().Render(r.Context(), w)
 }
 
 func (h *eventsHandler) homePage(w http.ResponseWriter, r *http.Request) error {
@@ -44,7 +45,8 @@ func (h *eventsHandler) homePage(w http.ResponseWriter, r *http.Request) error {
 		Joins("JOIN attended_events ON attended_events.event_id = events.id").
 		Joins("JOIN users ON users.email = attended_events.user_email").
 		Where("users.email = ?", email).
-		Preload("Hosts").Find(&events).
+		Preload("Hosts").
+        Find(&events).
 		Error
 
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -58,16 +60,16 @@ func (h *eventsHandler) getById(w http.ResponseWriter, r *http.Request) error {
 	title := r.PathValue("title")
 
 	var events []db.Event
-	err := h.db.Preload("Hosts").Preload("Attendees").Find(&events).Error
+	err := h.db.Preload("Hosts").Preload("Agenda").Preload("Attendees").Find(&events).Error
 
-    var event *db.Event
+	var event *db.Event
 
-    for _, e := range events {
-        if e.Title == title {
-            event = &e
-            break;
-        }
-    }
+	for _, e := range events {
+		if e.Title == title {
+			event = &e
+			break
+		}
+	}
 
 	if event == nil || errors.Is(err, gorm.ErrRecordNotFound) {
 		return chttp.NotFoundError("Event with such ID doesn't exist")
@@ -75,32 +77,35 @@ func (h *eventsHandler) getById(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-    email, err := utils.GetEmailFromContext(r)
+	email, err := utils.GetEmailFromContext(r)
 
-    if err != nil && !errors.Is(err, utils.ErrEmptyEmail) {
-        return err
-    }
+	if err != nil && !errors.Is(err, utils.ErrEmptyEmail) {
+		return err
+	}
 
-    var isOwner bool
+	var isOwner bool
 
-    for _, host := range event.Hosts {
-        if host.Email == email {
-            isOwner = true;
-            break;
-        }
-    }
+	for _, host := range event.Hosts {
+		if host.Email == email {
+			isOwner = true
+			break
+		}
+	}
 
 	return vevents.Details(*event, events, isOwner).Render(r.Context(), w)
 }
 
 func (h *eventsHandler) createEvent(w http.ResponseWriter, r *http.Request) error {
 	type request struct {
-		Title       string      `json:"title"`
-		Description string      `json:"description"`
-		Place       string      `json:"place"`
-		StartDate   utils.Time  `json:"startDate"`
-		EndDate     utils.Time  `json:"endDate"`
-		Hosts       utils.StringArr `json:"hosts"`
+		Title              string          `json:"title"`
+		Description        string          `json:"description"`
+		Place              string          `json:"place"`
+		StartDate          utils.Time      `json:"startDate"`
+		EndDate            utils.Time      `json:"endDate"`
+		Hosts              utils.StringArr `json:"hosts"`
+		AgendaTitles       utils.StringArr `json:"agendaTitles"`
+		AgendaDates        utils.TimeArr   `json:"agendaDates"`
+		AgendaDescriptions utils.StringArr `json:"agendaDescriptions"`
 	}
 
 	var data request
@@ -126,9 +131,11 @@ func (h *eventsHandler) createEvent(w http.ResponseWriter, r *http.Request) erro
 	}
 
 	var hosts []*db.User
-	for _, email := range data.Hosts.Entries {
+	for _, email := range data.Hosts {
 		hosts = append(hosts, &db.User{Email: email})
 	}
+
+	points, err := handleAgendaPoints(data.AgendaTitles, data.AgendaDates, data.AgendaDescriptions)
 
 	hosts = append(hosts, &db.User{Email: email})
 
@@ -136,10 +143,11 @@ func (h *eventsHandler) createEvent(w http.ResponseWriter, r *http.Request) erro
 		Title:       data.Title,
 		Description: data.Description,
 		Place:       data.Place,
-		StartDate:   data.StartDate.Time,
-		EndDate:     data.EndDate.Time,
+		StartDate:   time.Time(data.StartDate),
+		EndDate:     time.Time(data.EndDate),
 		Hosts:       hosts,
-        Attendees:   hosts,
+		Attendees:   hosts,
+		Agenda:      points,
 	}
 
 	err = h.db.Create(&event).Error
@@ -152,8 +160,29 @@ func (h *eventsHandler) createEvent(w http.ResponseWriter, r *http.Request) erro
 		toast.AddToast(w, toast.SUCCESS, "Event has been added")
 	}
 
-    w.WriteHeader(http.StatusCreated)
+	w.WriteHeader(http.StatusCreated)
 	w.Write([]byte(event.ID))
 
 	return nil
+}
+
+func handleAgendaPoints(titles []string, dates []utils.Time, descriptions []string) ([]db.AgendaPoint, error) {
+	var result []db.AgendaPoint
+
+	if len(titles) != len(dates) || len(titles) != len(descriptions) || len(dates) != len(descriptions) {
+		return result, errors.New("Invalid agenda points entries")
+	}
+
+	for i := range len(titles) {
+		point := db.AgendaPoint{
+			Base:        db.Base{},
+			Title:       titles[i],
+			Description: descriptions[i],
+			StartDate:   time.Time(dates[i]),
+		}
+
+		result = append(result, point)
+	}
+
+	return result, nil
 }

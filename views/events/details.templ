@@ -4,73 +4,76 @@ import "htmx-events-app/views/layout"
 import "htmx-events-app/db"
 import "time"
 import "htmx-events-app/views/components"
+import "fmt"
 
 templ Details(event db.Event, events []db.Event, isOwner bool) {
-	@vlayout.Base() {
-		@vlayout.Header()
-		<div class="p-4 grid gap-4 grid-cols-4">
-			<section class="grid gap-2 card content-start">
-				<h1 class="text-4xl font-bold">{ event.Title }</h1>
-				<p class="text-black/70">{ event.Description }</p>
-				<ul class="grid gap-2">
-					<li class="grid">
-						Date
-						<span class="text-black/70">
-							{ event.StartDate.Format(time.DateOnly) }
-						</span>
-					</li>
-					<li class="grid">
-						Location
-						<span class="text-black/70">{ event.Place }</span>
-					</li>
-					<li>
-						Hosts
-						<ul class="flex gap-2">
-							for _, host := range event.Hosts {
-								<li class="rounded-full h-8 w-8 grid place-items-center bg-gray-200">
-									{ getFirstLetter(host.Name) }
-								</li>
-							}
-						</ul>
-					</li>
-				</ul>
-			</section>
-			<section class="card flex flex-col">
-				<h2 class="text-xl font-semibold mb-2">Attendees</h2>
-				<ul class="grid gap-2 h-full max-h-60 content-start overflow-scroll">
-					for _, attendee := range event.Attendees {
-						<li class="flex gap-2 items-center">
-							<span class="w-8 h-8 rounded-full bg-gray-200 grid place-items-center">
-								{ getFirstLetter(attendee.Name) }
-							</span>
-							<div class="grid items-center">
-								{ attendee.Name }
-							</div>
-						</li>
-					}
-				</ul>
-				if isOwner {
-					<div class="justify-self-end mt-auto">
-						@vcomponents.InviteAttendeesPanel(event.Title)
-					</div>
-				}
-			</section>
-			<section class="grid gap-2 h-fit card col-span-2">
-				<h2 class="font-semibold text-xl">Agenda</h2>
-				<p class="text-black/70">Check out the schedule of events and plan your day.</p>
-				<ul class="grid gap-6">
-					for range 5 {
-						<li class="flex items-center gap-4">
-							<small class="rounded-full bg-black text-white px-5 py-1 text-xs">Time</small>
-							<div>
-								<h3>Welcome</h3>
-								<p class="text-black/70">Join us as we kick off the event and set the tone for the day.</p>
-							</div>
-							>
-						</li>
-					}
-				</ul>
-			</section>
-		</div>
-	}
+@vlayout.Base() {
+@vlayout.Header()
+<div class="p-4 grid gap-4 grid-cols-4">
+    <section class="grid gap-2 card content-start">
+        <h1 class="text-4xl font-bold">{ event.Title }</h1>
+        <p class="text-black/70">{ event.Description }</p>
+        <ul class="grid gap-2">
+            <li class="grid">
+                Date
+                <span class="text-black/70">
+                    { event.StartDate.Format(time.DateOnly) }
+                </span>
+            </li>
+            <li class="grid">
+                Location
+                <span class="text-black/70">{ event.Place }</span>
+            </li>
+            <li>
+                Hosts
+                <ul class="flex gap-2">
+                    for _, host := range event.Hosts {
+                    <li class="rounded-full h-8 w-8 grid place-items-center bg-gray-200">
+                        { getFirstLetter(host.Name) }
+                    </li>
+                    }
+                </ul>
+            </li>
+        </ul>
+    </section>
+    <section class="card flex flex-col">
+        <h2 class="text-xl font-semibold mb-2">Attendees</h2>
+        <ul class="grid gap-2 h-full max-h-60 content-start overflow-scroll">
+            for _, attendee := range event.Attendees {
+            <li class="flex gap-2 items-center">
+                <span class="w-8 h-8 rounded-full bg-gray-200 grid place-items-center">
+                    { getFirstLetter(attendee.Name) }
+                </span>
+                <div class="grid items-center">
+                    { attendee.Name }
+                </div>
+            </li>
+            }
+        </ul>
+        if isOwner {
+        <div class="justify-self-end mt-auto">
+            @vcomponents.InviteAttendeesPanel(event.Title)
+        </div>
+        }
+    </section>
+    <section class="grid gap-2 h-fit card col-span-2">
+        <h2 class="font-semibold text-xl">Agenda</h2>
+        <p class="text-black/70">Check out the schedule of events and plan your day.</p>
+        <ul class="grid gap-6">
+            for _, point := range event.Agenda {
+            <li class="flex items-center gap-4">
+                <small class="rounded-full bg-black text-white px-5 py-1 text-xs">
+                    { fmt.Sprintf("%d:%d", point.StartDate.Hour(), point.StartDate.Minute()) }
+                </small>
+                <div>
+                    <h3>{ point.Title }</h3>
+                    <p class="text-black/70">{ point.Description }</p>
+                </div>
+                >
+            </li>
+            }
+        </ul>
+    </section>
+</div>
+}
 }

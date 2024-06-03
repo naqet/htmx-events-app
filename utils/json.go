@@ -6,9 +6,7 @@ import (
 	"time"
 )
 
-type Time struct {
-	time.Time
-}
+type Time time.Time
 
 func (t *Time) UnmarshalJSON(b []byte) error {
 	if len(b) < 1 {
@@ -19,13 +17,51 @@ func (t *Time) UnmarshalJSON(b []byte) error {
 	if err != nil {
 		return err
 	}
-	*t = Time{val}
+	*t = Time(val)
 	return nil
 }
 
-type StringArr struct {
-	Entries []string
+type TimeArr []Time
+
+func (t *TimeArr) UnmarshalJSON(b []byte) error {
+	var raw interface{}
+
+	if err := json.Unmarshal(b, &raw); err != nil {
+		return err
+	}
+
+	switch v := raw.(type) {
+	case string:
+		var cTime Time
+		err := json.Unmarshal([]byte(`"`+v+`"`), &cTime)
+
+		if err != nil {
+			return err
+		}
+		*t = []Time{cTime}
+	case []interface{}:
+		for _, item := range v {
+			str, ok := item.(string)
+			if !ok {
+				return errors.New("Invalid entry in array")
+			}
+
+			var cTime Time
+			err := json.Unmarshal([]byte(`"`+str+`"`), &cTime)
+
+			if err != nil {
+				return err
+			}
+			*t = append(*t, cTime)
+		}
+	default:
+		return errors.New("Invalid time array")
+	}
+
+	return nil
 }
+
+type StringArr []string
 
 func (h *StringArr) UnmarshalJSON(b []byte) error {
 	var raw interface{}
@@ -36,18 +72,18 @@ func (h *StringArr) UnmarshalJSON(b []byte) error {
 
 	switch v := raw.(type) {
 	case string:
-		h.Entries = []string{v}
+		*h = []string{v}
 	case []interface{}:
 		for _, item := range v {
 			str, ok := item.(string)
 			if !ok {
-				return errors.New("Invalid entry in hosts")
+				return errors.New("Invalid entry in array")
 			}
 
-			h.Entries = append(h.Entries, str)
+			*h = append(*h, str)
 		}
 	default:
-		return errors.New("Invalid hosts")
+		return errors.New("Invalid string array")
 	}
 
 	return nil
