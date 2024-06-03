@@ -23,11 +23,11 @@ func (t *Time) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-type Hosts struct {
+type StringArr struct {
 	Entries []string
 }
 
-func (h *Hosts) UnmarshalJSON(b []byte) error {
+func (h *StringArr) UnmarshalJSON(b []byte) error {
 	var raw interface{}
 
 	if err := json.Unmarshal(b, &raw); err != nil {

@@ -57,7 +57,9 @@ templ Page(invitations []db.Invitation, hasMore bool) {
             </li>
             }
         </ul>
-        <a href="/invitations" class="peer-empty:hidden text-sm w-fit mx-auto text-black/50 pt-2">See more</a>
+        if hasMore {
+            <a href="/invitations" class="peer-empty:hidden text-sm w-fit mx-auto text-black/50 pt-2">See more</a>
+        }
         <p class="hidden text-black/50 peer-empty:block text-center text-xs">No invitations</p>
     </section>
 </div>

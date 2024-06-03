@@ -9,9 +9,9 @@ templ Details(event db.Event, events []db.Event, isOwner bool) {
 	@vlayout.Base() {
 		@vlayout.Header()
 		<div class="p-4 grid gap-4 grid-cols-4">
-			<section class="grid gap-2 card">
+			<section class="grid gap-2 card content-start">
 				<h1 class="text-4xl font-bold">{ event.Title }</h1>
-				<p class="max-w-md text-black/70">{ event.Description }</p>
+				<p class="text-black/70">{ event.Description }</p>
 				<ul class="grid gap-2">
 					<li class="grid">
 						Date
@@ -35,13 +35,28 @@ templ Details(event db.Event, events []db.Event, isOwner bool) {
 					</li>
 				</ul>
 			</section>
-			if isOwner {
-				<section class="card">
-					@vcomponents.InviteAttendeesPanel()
-				</section>
-			}
+			<section class="card flex flex-col">
+				<h2 class="text-xl font-semibold mb-2">Attendees</h2>
+				<ul class="grid gap-2 h-full max-h-60 content-start overflow-scroll">
+					for _, attendee := range event.Attendees {
+						<li class="flex gap-2 items-center">
+							<span class="w-8 h-8 rounded-full bg-gray-200 grid place-items-center">
+								{ getFirstLetter(attendee.Name) }
+							</span>
+							<div class="grid items-center">
+								{ attendee.Name }
+							</div>
+						</li>
+					}
+				</ul>
+				if isOwner {
+					<div class="justify-self-end mt-auto">
+						@vcomponents.InviteAttendeesPanel(event.Title)
+					</div>
+				}
+			</section>
 			<section class="grid gap-2 h-fit card col-span-2">
-				<h2 class="font-semibold text-2xl">Agenda</h2>
+				<h2 class="font-semibold text-xl">Agenda</h2>
 				<p class="text-black/70">Check out the schedule of events and plan your day.</p>
 				<ul class="grid gap-6">
 					for range 5 {

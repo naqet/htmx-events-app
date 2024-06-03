@@ -41,8 +41,8 @@ func (h *eventsHandler) homePage(w http.ResponseWriter, r *http.Request) error {
 
 	var events []db.Event
 	err = h.db.
-		Joins("JOIN hosted_events ON hosted_events.event_id = events.id").
-		Joins("JOIN users ON users.email = hosted_events.user_email").
+		Joins("JOIN attended_events ON attended_events.event_id = events.id").
+		Joins("JOIN users ON users.email = attended_events.user_email").
 		Where("users.email = ?", email).
 		Preload("Hosts").Find(&events).
 		Error
@@ -58,7 +58,7 @@ func (h *eventsHandler) getById(w http.ResponseWriter, r *http.Request) error {
 	title := r.PathValue("title")
 
 	var events []db.Event
-	err := h.db.Preload("Hosts").Find(&events).Error
+	err := h.db.Preload("Hosts").Preload("Attendees").Find(&events).Error
 
     var event *db.Event
 
@@ -100,7 +100,7 @@ func (h *eventsHandler) createEvent(w http.ResponseWriter, r *http.Request) erro
 		Place       string      `json:"place"`
 		StartDate   utils.Time  `json:"startDate"`
 		EndDate     utils.Time  `json:"endDate"`
-		Hosts       utils.Hosts `json:"hosts"`
+		Hosts       utils.StringArr `json:"hosts"`
 	}
 
 	var data request
@@ -139,6 +139,7 @@ func (h *eventsHandler) createEvent(w http.ResponseWriter, r *http.Request) erro
 		StartDate:   data.StartDate.Time,
 		EndDate:     data.EndDate.Time,
 		Hosts:       hosts,
+        Attendees:   hosts,
 	}
 
 	err = h.db.Create(&event).Error

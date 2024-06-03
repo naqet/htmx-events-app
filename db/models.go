@@ -36,8 +36,8 @@ type Event struct {
 	Place     string    `json:"place"`
 	StartDate time.Time `json:"startDate"`
 	EndDate   time.Time `json:"endDate"`
-	Hosts     []*User   `json:"Hosts" gorm:"many2many:hosted_events;References:Email"`
-	Attendees []*User   `json:"Attendees" gorm:"many2many:attended_events;References:Email"`
+	Hosts     []*User   `json:"hosts" gorm:"many2many:hosted_events;References:Email"`
+	Attendees []*User   `json:"attendees" gorm:"many2many:attended_events;References:Email"`
 }
 
 type Invitation struct {

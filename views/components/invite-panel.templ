@@ -1,7 +1,8 @@
 package vcomponents;
 
-templ InviteAttendeesPanel() {
-	<form class="grid gap-2 rounded-md" hx-post="/dashboard" hx-trigger="submit" hx-swap="none">
+templ InviteAttendeesPanel(eventTitle string) {
+	<form class="grid gap-2 rounded-md" hx-post="/invitations/many" hx-trigger="submit" hx-swap="none" hx-ext="json-enc">
+		<input value={ eventTitle } hidden name="event"/>
 		<h2>Invite users to this event</h2>
 		@Multiselect{
 			Name:        "attendees",
