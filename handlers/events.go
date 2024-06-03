@@ -75,7 +75,22 @@ func (h *eventsHandler) getById(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	return vevents.Details(*event, events).Render(r.Context(), w)
+    email, err := utils.GetEmailFromContext(r)
+
+    if err != nil && !errors.Is(err, utils.ErrEmptyEmail) {
+        return err
+    }
+
+    var isOwner bool
+
+    for _, host := range event.Hosts {
+        if host.Email == email {
+            isOwner = true;
+            break;
+        }
+    }
+
+	return vevents.Details(*event, events, isOwner).Render(r.Context(), w)
 }
 
 func (h *eventsHandler) createEvent(w http.ResponseWriter, r *http.Request) error {

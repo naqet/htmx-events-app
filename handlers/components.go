@@ -23,8 +23,8 @@ func NewComponentsHandler(app *chttp.App) {
 
 	route.Use(middlewares.Auth)
 
-	route.Post("/users", h.users)
-	route.Get("/create-agenda-point", h.createAgendaPoint)
+	route.Post("/multiselect/all-users", h.users)
+	route.Get("/agenda/create-point", h.createAgendaPoint)
 }
 
 func (h *componentsHandler) createAgendaPoint(w http.ResponseWriter, r *http.Request) error {
@@ -39,7 +39,13 @@ func (h *componentsHandler) users(w http.ResponseWriter, r *http.Request) error 
 	}
 
 	search := r.FormValue("search")
-    hosts := r.Form["hosts"]
+	inputsName := r.FormValue("inputs-name")
+
+    if inputsName == "" {
+        inputsName = "users"
+    }
+
+    hosts := r.Form[inputsName]
 
 	var users []db.User
 	err = h.db.Where("email <> ? AND name LIKE ?", email, "%" + search + "%").Or("email IN ?", hosts).Find(&users).Error
@@ -60,5 +66,5 @@ func (h *componentsHandler) users(w http.ResponseWriter, r *http.Request) error 
         }
 		options = append(options, option)
 	}
-	return vcomponents.MultiselectOptions(options).Render(r.Context(), w)
+	return vcomponents.MultiselectOptions(options, inputsName).Render(r.Context(), w)
 }

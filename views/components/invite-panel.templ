@@ -1,0 +1,13 @@
+package vcomponents;
+
+templ InviteAttendeesPanel() {
+	<form class="grid gap-2 rounded-md" hx-post="/dashboard" hx-trigger="submit" hx-swap="none">
+		<h2>Invite users to this event</h2>
+		@Multiselect{
+			Name:        "attendees",
+			Placeholder: "Search...",
+			DataUrl:     "/components/multiselect/all-users",
+		}.UI()
+		<button class="text-sm p-2 border rounded-md">Send</button>
+	</form>
+}

@@ -1,43 +1,40 @@
 package vcomponents;
 
 import "github.com/satori/go.uuid"
-import "fmt"
 
 type Multiselect struct {
-	Options []Option
-    Name string
-	DataUrl string
-    Placeholder string
+	Options     []Option
+	Name        string
+	DataUrl     string
+	Placeholder string
 }
 
 var randomId = uuid.NewV4().String()
-var resultsId = fmt.Sprintf("multi-results-%s", randomId)
+var resultsId = "multi-results-" + randomId
 
 templ (m Multiselect) UI() {
 	<div
 		class="w-full group relative after:content-[attr(data-count)] after:absolute after:border after:rounded-full after:w-6 after:h-6 after:grid after:place-items-center after:top-1/2 after:-translate-y-1/2 after:text-xs after:bg-black/10 after:right-6"
-		data-count="0"
-		id={ fmt.Sprintf("multi-%s", randomId) }
+		data-count="0" id={ "multi-" + randomId }
 	>
 		<input
 			class="p-1 border w-full"
 			type="search"
 			name="search"
 			form="non-existent"
-            placeholder={ m.Placeholder }
+			placeholder={ m.Placeholder }
 			hx-post={ m.DataUrl }
 			hx-trigger="input changed delay:500ms, search, revealed"
-			hx-target={ fmt.Sprintf("#%s", resultsId) }
+			hx-target={ "#" + resultsId }
 			hx-ext="ignore:json-enc"
+			hx-include="[name='inputs-name']"
 			hx-swap="innerHTML"
 			autocomplete="off"
 		/>
+		<input disabled hidden value={ m.Name } name="inputs-name"/>
 		<fieldset
-			name={ m.Name }
 			id={ resultsId }
 			class="absolute z-50 bg-white border top-[110%] p-2 pr-4 hidden rounded group-focus-within:grid hover:grid gap-2 max-h-52 min-w-60 overflow-y-scroll"
-		>
-			@MultiselectOptions(m.Options)
-		</fieldset>
+		></fieldset>
 	</div>
 }

@@ -8,6 +8,10 @@ import (
 	"net/http"
 )
 
+var (
+	ErrEmptyEmail = fmt.Errorf("Senders email is empty")
+)
+
 func GetDataFromBody(body io.Reader, dst any) error {
 	content, err := io.ReadAll(body)
 
@@ -27,10 +31,14 @@ func GetDataFromBody(body io.Reader, dst any) error {
 func GetEmailFromContext(r *http.Request) (string, error) {
 	email, ok := r.Context().Value("email").(string)
 
-	if !ok || email == "" {
-		return email, fmt.Errorf("Senders email couldn't be obtained from the request")
+	if !ok {
+		return "", fmt.Errorf("Senders email couldn't be obtained from the request")
 	}
-    return email, nil
+
+	if email == "" {
+		return "", ErrEmptyEmail
+	}
+	return email, nil
 }
 
 func WriteJson(w http.ResponseWriter, value any) error {

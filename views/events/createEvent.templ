@@ -39,7 +39,8 @@ templ CreateEventPage() {
 					<label class="grid relative">
 						Hosts
 						@vcomponents.Multiselect{
-							DataUrl: "/components/users",
+							DataUrl: "/components/multiselect/all-users",
+                            Name: "hosts",
 						}.UI()
 						<small class="text-black/70">
 							User creating the event is added as host by default
