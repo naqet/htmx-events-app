@@ -24,6 +24,11 @@ func NewComponentsHandler(app *chttp.App) {
 	route.Use(middlewares.Auth)
 
 	route.Post("/users", h.users)
+	route.Get("/create-agenda-point", h.createAgendaPoint)
+}
+
+func (h *componentsHandler) createAgendaPoint(w http.ResponseWriter, r *http.Request) error {
+    return vcomponents.CreateAgendaPoint().Render(r.Context(), w)
 }
 
 func (h *componentsHandler) users(w http.ResponseWriter, r *http.Request) error {

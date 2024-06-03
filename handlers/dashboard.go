@@ -4,14 +4,15 @@ import (
 	"htmx-events-app/db"
 	"htmx-events-app/internal/chttp"
 	"htmx-events-app/middlewares"
+	"htmx-events-app/utils"
 	vdashboard "htmx-events-app/views/dashboard"
 	"net/http"
 
 	"gorm.io/gorm"
 )
 
-type dashboardHandler struct{
-    db *gorm.DB
+type dashboardHandler struct {
+	db *gorm.DB
 }
 
 func NewDashboardHandler(app *chttp.App) {
@@ -24,14 +25,27 @@ func NewDashboardHandler(app *chttp.App) {
 }
 
 func (h *dashboardHandler) homePage(w http.ResponseWriter, r *http.Request) error {
-    var invitations []db.Invitation
-    limit := 5
-    var count int64
-    tx := h.db.Preload("From").Preload("Event").Limit(limit).Find(&invitations).Count(&count)
+	email, err := utils.GetEmailFromContext(r)
 
-    if tx.Error != nil {
-        return tx.Error
-    }
+	if err != nil {
+		return err
+	}
+
+	var invitations []db.Invitation
+	limit := 5
+	var count int64
+	err = h.db.
+		Preload("From").
+		Preload("Event").
+		Where("to_email = ?", email).
+		Limit(limit).
+		Find(&invitations).
+		Count(&count).
+		Error
+
+	if err != nil {
+		return err
+	}
 
 	return vdashboard.Page(invitations, int(count) > limit).Render(r.Context(), w)
 }

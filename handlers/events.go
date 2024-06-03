@@ -23,8 +23,13 @@ func NewEventsHandler(app *chttp.App) {
 
 	route.Use(middlewares.Auth)
 	route.Get("/", h.homePage)
+	route.Get("/create", h.createEventPage)
 	route.Get("/{title}", h.getById)
 	route.Post("/{$}", h.createEvent)
+}
+
+func (h *eventsHandler) createEventPage(w http.ResponseWriter, r *http.Request) error {
+    return vevents.CreateEventPage().Render(r.Context(), w)
 }
 
 func (h *eventsHandler) homePage(w http.ResponseWriter, r *http.Request) error {

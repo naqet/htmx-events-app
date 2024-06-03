@@ -5,10 +5,10 @@ import "htmx-events-app/views/welcome"
 
 templ SignUpPage() {
 	@vlayout.Base() {
-        @vwelcome.Header()
+		@vwelcome.Header()
 		<div class="grid place-items-center p-4 absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 w-full">
 			<form
-				class="border rounded-md grid gap-2 p-4 w-full max-w-sm"
+				class="border rounded-md grid gap-2 p-4 w-full max-w-sm bg-secondary"
 				hx-ext="response-targets, json-enc"
 				hx-trigger="submit"
 				hx-swap="innerHTML"

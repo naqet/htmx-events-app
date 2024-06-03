@@ -8,6 +8,10 @@
     }
 }
 
+input, textarea {
+    @apply rounded-md border p-1
+}
+
 .toast {
     @apply flex items-center p-4 rounded-lg shadow-md bg-gray-50;
 }
