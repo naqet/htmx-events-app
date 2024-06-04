@@ -7,6 +7,7 @@ import (
 	"htmx-events-app/internal/toast"
 	"htmx-events-app/middlewares"
 	"htmx-events-app/utils"
+	vcomponents "htmx-events-app/views/components"
 	vevents "htmx-events-app/views/events"
 	"net/http"
 	"time"
@@ -25,8 +26,9 @@ func NewEventsHandler(app *chttp.App) {
 	route.Use(middlewares.Auth)
 	route.Get("/", h.homePage)
 	route.Get("/create", h.createEventPage)
-	route.Get("/{title}", h.getById)
+	route.Get("/{title}", h.getByTitle)
 	route.Post("/{$}", h.createEvent)
+	route.Post("/{title}/agenda-point", h.createAgendaPoint)
 }
 
 func (h *eventsHandler) createEventPage(w http.ResponseWriter, r *http.Request) error {
@@ -46,7 +48,7 @@ func (h *eventsHandler) homePage(w http.ResponseWriter, r *http.Request) error {
 		Joins("JOIN users ON users.email = attended_events.user_email").
 		Where("users.email = ?", email).
 		Preload("Hosts").
-        Find(&events).
+		Find(&events).
 		Error
 
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -56,7 +58,7 @@ func (h *eventsHandler) homePage(w http.ResponseWriter, r *http.Request) error {
 	return vevents.Page(events).Render(r.Context(), w)
 }
 
-func (h *eventsHandler) getById(w http.ResponseWriter, r *http.Request) error {
+func (h *eventsHandler) getByTitle(w http.ResponseWriter, r *http.Request) error {
 	title := r.PathValue("title")
 
 	var events []db.Event
@@ -72,7 +74,7 @@ func (h *eventsHandler) getById(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	if event == nil || errors.Is(err, gorm.ErrRecordNotFound) {
-		return chttp.NotFoundError("Event with such ID doesn't exist")
+		return chttp.NotFoundError("Event with such title doesn't exist")
 	} else if err != nil {
 		return err
 	}
@@ -185,4 +187,64 @@ func handleAgendaPoints(titles []string, dates []utils.Time, descriptions []stri
 	}
 
 	return result, nil
+}
+
+func (h *eventsHandler) createAgendaPoint(w http.ResponseWriter, r *http.Request) error {
+	type request struct {
+		Title       string     `json:"title"`
+		Description string     `json:"description"`
+		StartTime   utils.Time `json:"startTime"`
+	}
+
+	var data request
+
+	err := utils.GetDataFromBody(r.Body, &data)
+
+	if err != nil {
+		return chttp.BadRequestError()
+	}
+
+	title := r.PathValue("title")
+
+	var event db.Event
+	err = h.db.Preload("Hosts").Where("title = ?", title).First(&event).Error
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return chttp.NotFoundError("Event with such title doesn't exist")
+	} else if err != nil {
+		return err
+	}
+
+	email, err := utils.GetEmailFromContext(r)
+
+	if err != nil {
+		return err
+	}
+
+	var isOwner bool
+
+	for _, host := range event.Hosts {
+		if host.Email == email {
+			isOwner = true
+			break
+		}
+	}
+
+	if !isOwner {
+		return chttp.UnauthorizedError("Only event's host can add agenda points")
+	}
+
+	agendaPoint := db.AgendaPoint{
+		Title:       data.Title,
+		Description: data.Description,
+		StartDate:   time.Time(data.StartTime),
+	}
+
+	err = h.db.Model(&event).Association("Agenda").Append(&agendaPoint)
+
+	if err != nil {
+		return err
+	}
+
+	return vcomponents.AgendaPoint(agendaPoint, isOwner).Render(r.Context(), w)
 }

@@ -34,6 +34,7 @@ func main() {
 	handlers.NewEventsHandler(app)
 	handlers.NewComponentsHandler(app)
 	handlers.NewInvitationsHandler(app)
+	handlers.NewAgendaPointsHandler(app)
 
 	err := app.Listen("localhost:3000")
 	if err != nil && !errors.Is(err, http.ErrServerClosed) {
