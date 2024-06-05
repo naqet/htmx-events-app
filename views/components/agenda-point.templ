@@ -27,7 +27,7 @@ templ AgendaPoint(point db.AgendaPoint, isOwner bool) {
 		</small>
 		<div>
 			<h3>{ point.Title }</h3>
-			<p class="text-black/70 text-sm leading-tight">{ point.Description }</p>
+			<p class="text-black/70 text-sm leading-tight empty:hidden">{ point.Description }</p>
 		</div>
 		if isOwner {
 			<button

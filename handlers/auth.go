@@ -146,7 +146,7 @@ func (h *authHandler) signUp(w http.ResponseWriter, r *http.Request) error {
 		utils.AddHtmxRedirect(w, "/auth/login")
 	}
 
-    w.WriteHeader(http.StatusCreated)
+	w.WriteHeader(http.StatusCreated)
 	w.Write([]byte(http.StatusText(http.StatusCreated)))
 	return nil
 }
@@ -162,7 +162,7 @@ func (h *authHandler) logOut(w http.ResponseWriter, r *http.Request) error {
 		SameSite: http.SameSiteStrictMode,
 	}
 
-    http.SetCookie(w, &cookie)
+	http.SetCookie(w, &cookie)
 
 	if utils.IsHtmxRequest(r) {
 		utils.AddHtmxRedirect(w, "/")

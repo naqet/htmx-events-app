@@ -1,0 +1,25 @@
+package vcomponents;
+
+import "htmx-events-app/utils"
+import "sort"
+
+func sortKeys(data utils.AgendaSections) []string {
+keys := []string{}
+for k := range data {
+keys = append(keys, k)
+}
+
+sort.Strings(keys)
+return keys
+}
+
+templ AgendaList(sections utils.AgendaSections, isOwner bool) {
+for _, date := range sortKeys(sections) {
+<hr data-value={ date } class="agenda-date" />
+<ul class="grid gap-6">
+    for _, point := range sections[date] {
+    @AgendaPoint(point, isOwner)
+    }
+</ul>
+}
+}

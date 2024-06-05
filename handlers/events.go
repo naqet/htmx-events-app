@@ -61,19 +61,12 @@ func (h *eventsHandler) homePage(w http.ResponseWriter, r *http.Request) error {
 func (h *eventsHandler) getByTitle(w http.ResponseWriter, r *http.Request) error {
 	title := r.PathValue("title")
 
-	var events []db.Event
-	err := h.db.Preload("Hosts").Preload("Agenda").Preload("Attendees").Find(&events).Error
+	var event db.Event
+	err := h.db.Where("title = ?", title).Preload("Hosts").Preload("Agenda", func(tx *gorm.DB) *gorm.DB {
+		return tx.Order("start_time ASC")
+	}).Preload("Attendees").Find(&event).Error
 
-	var event *db.Event
-
-	for _, e := range events {
-		if e.Title == title {
-			event = &e
-			break
-		}
-	}
-
-	if event == nil || errors.Is(err, gorm.ErrRecordNotFound) {
+	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return chttp.NotFoundError("Event with such title doesn't exist")
 	} else if err != nil {
 		return err
@@ -94,7 +87,7 @@ func (h *eventsHandler) getByTitle(w http.ResponseWriter, r *http.Request) error
 		}
 	}
 
-	return vevents.Details(*event, events, isOwner).Render(r.Context(), w)
+	return vevents.Details(event, isOwner).Render(r.Context(), w)
 }
 
 func (h *eventsHandler) createEvent(w http.ResponseWriter, r *http.Request) error {
@@ -215,16 +208,16 @@ func (h *eventsHandler) createAgendaPoint(w http.ResponseWriter, r *http.Request
 		return err
 	}
 
-    inTimeSpan := utils.InTimeSpan(event.StartDate, event.EndDate, time.Time(data.StartTime))
+	inTimeSpan := utils.InTimeSpan(event.StartDate, event.EndDate, time.Time(data.StartTime))
 
-    if !inTimeSpan {
-        msg := "Agenda point must be in the time span of the event"
-        err = toast.AddToast(w, toast.DANGER, msg)
-        if err != nil {
-            return err
-        }
-        return chttp.BadRequestError(msg)
-    }
+	if !inTimeSpan {
+		msg := "Agenda point must be in the time span of the event"
+		err = toast.AddToast(w, toast.DANGER, msg)
+		if err != nil {
+			return err
+		}
+		return chttp.BadRequestError(msg)
+	}
 
 	email, err := utils.GetEmailFromContext(r)
 
@@ -257,5 +250,13 @@ func (h *eventsHandler) createAgendaPoint(w http.ResponseWriter, r *http.Request
 		return err
 	}
 
-	return vcomponents.AgendaPoint(agendaPoint, isOwner).Render(r.Context(), w)
+	err = h.db.Preload("Agenda", func(tx *gorm.DB) *gorm.DB {
+		return tx.Order("start_time ASC")
+	}).Where("title = ?", title).First(&event).Error
+
+	if err != nil {
+		return err
+	}
+
+	return vcomponents.AgendaList(utils.OrganizeAgendaPoints(event.Agenda), isOwner).Render(r.Context(), w)
 }
