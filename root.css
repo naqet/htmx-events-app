@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+
+    input,
+    textarea {
+        @apply rounded-md border p-1
+    }
+}
+
 @layer components {
     .submit-btn {
         @apply py-2 px-4 bg-gray-500 text-white rounded-md
@@ -10,43 +18,34 @@
     .card {
         @apply p-4 border rounded-md bg-secondary
     }
-}
 
-@keyframes test {
-    0% {
-        opacity: 0;
-        transform: translateX(10px) scale(0.95);
-    }
+    .agenda-date {
+        @apply my-2 overflow-visible text-center text-sm after:px-2 after:content-[attr(data-value)] after:text-black/70 after:relative after:inline-block after:-top-[0.7rem] after:bg-secondary;
 
-    100% {
-        opacity: 100;
-        transform: translateX(0) scale(1);
+        &:not(:has(+ ul > li)) {
+            display: none
+        }
     }
 }
 
-input,
-textarea {
-    @apply rounded-md border p-1
-}
+@layer utilities {
+    .toast {
+        @apply flex items-center p-4 rounded-lg shadow-md bg-gray-50 animate-appear;
+    }
 
-.toast {
-    @apply flex items-center p-4 rounded-lg shadow-md bg-gray-50;
-    animation-name: test;
-    animation-duration: 300ms;
-}
+    .toast-success {
+        @apply bg-green-50 border-l-4 border-green-300;
+    }
 
-.toast-success {
-    @apply bg-green-50 border-l-4 border-green-300;
-}
+    .toast-info {
+        @apply bg-blue-50 border-l-4 border-blue-300;
+    }
 
-.toast-info {
-    @apply bg-blue-50 border-l-4 border-blue-300;
-}
+    .toast-danger {
+        @apply bg-red-50 border-l-4 border-red-300;
+    }
 
-.toast-danger {
-    @apply bg-red-50 border-l-4 border-red-300;
-}
-
-.toast-message {
-    @apply flex-1 text-sm;
+    .toast-message {
+        @apply flex-1 text-sm;
+    }
 }
