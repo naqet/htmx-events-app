@@ -3,18 +3,35 @@ package vcomponents;
 import "htmx-events-app/db"
 import "fmt"
 
+func formatTime(point db.AgendaPoint) string {
+    hour := point.StartTime.Hour()
+    minute := point.StartTime.Minute()
+    hourPrefix := ""
+    minutePrefix := ""
+
+    if hour < 10 {
+        hourPrefix = "0"
+    }
+
+    if minute < 10 {
+        minutePrefix = "0"
+    }
+
+    return fmt.Sprintf("%s%d:%s%d", hourPrefix, hour, minutePrefix, minute)
+}
+
 templ AgendaPoint(point db.AgendaPoint, isOwner bool) {
 	<li class="flex items-center gap-4">
-		<small class="rounded-full bg-black text-white px-5 py-1 text-xs">
-			{ fmt.Sprintf("%d:%d", point.StartDate.Hour(), point.StartDate.Minute()) }
+		<small class="rounded-full bg-black text-white px-5 py-1 text-xs min-w-[4.5rem] text-center">
+			{ formatTime(point)}
 		</small>
 		<div>
 			<h3>{ point.Title }</h3>
-			<p class="text-black/70">{ point.Description }</p>
+			<p class="text-black/70 text-sm leading-tight">{ point.Description }</p>
 		</div>
 		if isOwner {
 			<button
-				class="w-8 h-8 border rounded-md ml-auto grid place-items-center hover:bg-red-100/50 focus-visible:bg-red-100/50"
+				class="min-w-8 min-h-8 border rounded-md ml-auto grid place-items-center hover:bg-red-100/50 focus-visible:bg-red-100/50"
 				hx-confirm="Are you sure you want to delete this agenda point?"
 				hx-delete={ "/agenda-points/" + point.ID }
 				hx-target="closest li"

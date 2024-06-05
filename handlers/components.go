@@ -8,6 +8,7 @@ import (
 	"htmx-events-app/utils"
 	vcomponents "htmx-events-app/views/components"
 	"net/http"
+	"net/url"
 	"slices"
 
 	"gorm.io/gorm"
@@ -28,7 +29,12 @@ func NewComponentsHandler(app *chttp.App) {
 }
 
 func (h *componentsHandler) createAgendaPoint(w http.ResponseWriter, r *http.Request) error {
-    return vcomponents.CreateAgendaPoint().Render(r.Context(), w)
+	params, err := url.ParseQuery(r.URL.RawQuery)
+
+	if err != nil {
+		return err
+	}
+	return vcomponents.CreateAgendaPoint(params.Get("startDate"), params.Get("endDate")).Render(r.Context(), w)
 }
 
 func (h *componentsHandler) users(w http.ResponseWriter, r *http.Request) error {
@@ -41,29 +47,29 @@ func (h *componentsHandler) users(w http.ResponseWriter, r *http.Request) error 
 	search := r.FormValue("search")
 	inputsName := r.FormValue("inputs-name")
 
-    if inputsName == "" {
-        inputsName = "users"
-    }
+	if inputsName == "" {
+		inputsName = "users"
+	}
 
-    hosts := r.Form[inputsName]
+	hosts := r.Form[inputsName]
 
 	var users []db.User
-	err = h.db.Where("email <> ? AND name LIKE ?", email, "%" + search + "%").Or("email IN ?", hosts).Find(&users).Error
+	err = h.db.Where("email <> ? AND name LIKE ?", email, "%"+search+"%").Or("email IN ?", hosts).Find(&users).Error
 
-    if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-        return err
-    }
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return err
+	}
 
 	var options []vcomponents.Option
 	for _, user := range users {
-        option := vcomponents.Option{
+		option := vcomponents.Option{
 			Label: user.Name,
 			Value: user.Email,
-        }
+		}
 
-        if slices.Index(hosts, user.Email) != -1 {
-            option.Checked = true
-        }
+		if slices.Index(hosts, user.Email) != -1 {
+			option.Checked = true
+		}
 		options = append(options, option)
 	}
 	return vcomponents.MultiselectOptions(options, inputsName).Render(r.Context(), w)

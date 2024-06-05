@@ -4,13 +4,21 @@ import "htmx-events-app/db"
 import "time"
 import "fmt"
 
+func handleHosts(hosts []*db.User) []*db.User {
+    if len(hosts) < 3 {
+        return hosts
+    }
+
+    return hosts[:3]
+}
+
 templ Table(events []db.Event) {
 	<div class="m-4 p-2 border rounded-md overflow-x-scroll bg-secondary">
 		<table class="w-full caption-bottom text-sm min-w-[1200px]">
 			<thead>
 				<tr class="border-b h-12 text-left [&>th]:px-4">
 					<th class="w-1/6">Title</th>
-					<th class="w-3/6">Description</th>
+					<th class="w-5/12">Description</th>
 					<th class="w-1/6">Place</th>
 					<th class="w-1/12">Start Date</th>
 					<th class="w-1/12">End Date</th>
@@ -34,10 +42,10 @@ templ Table(events []db.Event) {
 							<td class="p-4">{ event.EndDate.Format(time.DateOnly) }</td>
 							<td class="p-4">
 								<ul class="flex items-center space-x-2">
-									for _, host := range event.Hosts {
-										<li class="rounded-full h-8 w-8 grid place-items-center bg-gray-200">
-											{ getFirstLetter(host.Name) }
-										</li>
+									for _, host := range handleHosts(event.Hosts) {
+                                        <li class="rounded-full h-8 w-8 grid place-items-center bg-gray-200">
+                                            { getFirstLetter(host.Name) }
+                                        </li>
 									}
 								</ul>
 							</td>

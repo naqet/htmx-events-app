@@ -45,7 +45,7 @@ type AgendaPoint struct {
 	Base
 	Title       string    `json:"title"`
 	Description string    `json:"description"`
-	StartDate   time.Time `json:"startDate"`
+	StartTime   time.Time `json:"startTime"`
 	Event       Event
 	EventId     string
 }

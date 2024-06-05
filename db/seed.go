@@ -61,14 +61,15 @@ func seedUsers(db *gorm.DB) ([]*User, error) {
 func seedEvents(db *gorm.DB, users []*User) {
 	events := []*Event{}
 	for range len(users) {
-        random := rand.Intn(len(users) - 1)
+		random := rand.Intn(len(users) - 1)
 		event := Event{
 			Title:       faker.Sentence(),
 			Description: faker.Sentence(),
 			Place:       faker.Word(),
-			StartDate:   time.Time{},
-			EndDate:     time.Time{}.Add(time.Hour * 72),
+			StartDate:   time.Now(),
+			EndDate:     time.Now().Add(time.Hour * 72),
 			Hosts:       []*User{users[random]},
+			Attendees:   []*User{users[random], users[len(users)-1]},
 		}
 
 		events = append(events, &event)

@@ -3,66 +3,85 @@ package vevents;
 import "htmx-events-app/views/components"
 import "htmx-events-app/views/layout"
 
+var adjustMinEndDate = templ.NewOnceHandle()
+
 templ CreateEventPage() {
-	@vlayout.Base() {
-		@vlayout.Header()
-		<div class="p-4">
-			<h1 class="text-xl font-bold">Create new event</h1>
-			<form
-				hx-post="/events"
-				hx-trigger="submit"
-				hx-ext="json-enc"
-				hx-swap="none"
-				class="p-4 rounded-md grid gap-4 max-w-5xl mx-auto lg:gap-8 lg:grid-cols-2 lg:grid-rows-[repeat(3, auto)]"
-			>
-				<div class="grid gap-1 h-fit">
-					<label class="grid">
-						Title
-						<input name="title" required/>
-					</label>
-					<label class="grid items-start">
-						Description
-						<textarea name="description" rows="3" required></textarea>
-					</label>
-					<label class="grid">
-						Place
-						<input name="place" class="p-1 border" required/>
-					</label>
-					<label class="grid">
-						Start
-						<input name="startDate" type="datetime-local" required/>
-					</label>
-					<label class="grid">
-						End
-						<input name="endDate" type="datetime-local" required/>
-					</label>
-					<label class="grid relative">
-						Hosts
-						@vcomponents.Multiselect{
-							DataUrl: "/components/multiselect/all-users",
-                            Name: "hosts",
-						}.UI()
-						<small class="text-black/70">
-							User creating the event is added as host by default
-						</small>
-					</label>
-				</div>
-				<div class="pt-2 lg:pt-0 border-t lg:border-none grid gap-1 items-start content-start lg:row-span-3">
-					<h2 class="text-lg font-semibold">Agenda</h2>
-					<ul class="grid" id="agenda-points">
-						@vcomponents.CreateAgendaPoint()
-					</ul>
-					<button
-						type="button"
-						hx-get="/components/agenda/create-point"
-						hx-target="#agenda-points"
-						hx-swap="beforeend"
-					>
-						+ Add Point
-					</button>
-				</div>
-				<button class="submit-btn justify-self-start self-start">Create Event</button>
-			</form>
-		</div>
-	}
+@adjustMinEndDate.Once() {
+<script type="text/javascript">
+    function adjustMinMaxDates() {
+        const startElement = this.form.querySelector("[name='startDate']")
+        const endElement = this.form.querySelector("[name='endDate']")
+        const startDate = new Date(startElement.value)
+        const endDate = new Date(endElement.value)
+
+        if (endDate < startDate) {
+            endElement.value = ""
+        }
+        endElement.min = startElement.value
+
+        const agendaDates = this.form.querySelectorAll("[name='agendaDates']")
+
+        for (const node of agendaDates) {
+            const date = new Date(node.value)
+            if (date < startDate || date > endDate) {
+                node.value = ""
+            }
+            node.min = startElement.value
+            node.max = endElement.value
+        }
+    }
+</script>
+}
+@vlayout.Base() {
+@vlayout.Header()
+<div class="p-4">
+    <h1 class="text-xl font-bold">Create new event</h1>
+    <form hx-post="/events" hx-trigger="submit" hx-ext="json-enc" hx-swap="none"
+        class="p-4 rounded-md grid gap-4 max-w-5xl mx-auto lg:gap-8 lg:grid-cols-2 lg:grid-rows-[repeat(3, auto)]">
+        <div class="grid gap-1 h-fit">
+            <label class="grid">
+                Title
+                <input name="title" required />
+            </label>
+            <label class="grid items-start">
+                Description
+                <textarea name="description" rows="3" required></textarea>
+            </label>
+            <label class="grid">
+                Place
+                <input name="place" class="p-1 border" required />
+            </label>
+            <label class="grid">
+                Start
+                <input name="startDate" type="datetime-local" required hx-on:change="adjustMinMaxDates.call(this)" />
+            </label>
+            <label class="grid">
+                End
+                <input name="endDate" type="datetime-local" required hx-on:change="adjustMinMaxDates.call(this)" />
+            </label>
+            <label class="grid relative">
+                Hosts
+                @vcomponents.Multiselect{
+                DataUrl: "/components/multiselect/all-users",
+                Name: "hosts",
+                }.UI()
+                <small class="text-black/70">
+                    User creating the event is added as host by default
+                </small>
+            </label>
+        </div>
+        <div class="pt-2 lg:pt-0 border-t lg:border-none grid gap-1 items-start content-start lg:row-span-3">
+            <h2 class="text-lg font-semibold">Agenda</h2>
+            <ul class="grid" id="agenda-points">
+                @vcomponents.CreateAgendaPoint("", "")
+            </ul>
+            <button type="button" hx-get="/components/agenda/create-point" hx-include="[name='startDate'], [name='endDate']" hx-target="#agenda-points"
+                hx-swap="beforeend">
+                + Add Point
+            </button>
+        </div>
+        <button class="submit-btn justify-self-start self-start">Create Event</button>
+    </form>
+</div>
+}
 }

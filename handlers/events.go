@@ -180,7 +180,7 @@ func handleAgendaPoints(titles []string, dates []utils.Time, descriptions []stri
 			Base:        db.Base{},
 			Title:       titles[i],
 			Description: descriptions[i],
-			StartDate:   time.Time(dates[i]),
+			StartTime:   time.Time(dates[i]),
 		}
 
 		result = append(result, point)
@@ -215,6 +215,17 @@ func (h *eventsHandler) createAgendaPoint(w http.ResponseWriter, r *http.Request
 		return err
 	}
 
+    inTimeSpan := utils.InTimeSpan(event.StartDate, event.EndDate, time.Time(data.StartTime))
+
+    if !inTimeSpan {
+        msg := "Agenda point must be in the time span of the event"
+        err = toast.AddToast(w, toast.DANGER, msg)
+        if err != nil {
+            return err
+        }
+        return chttp.BadRequestError(msg)
+    }
+
 	email, err := utils.GetEmailFromContext(r)
 
 	if err != nil {
@@ -237,7 +248,7 @@ func (h *eventsHandler) createAgendaPoint(w http.ResponseWriter, r *http.Request
 	agendaPoint := db.AgendaPoint{
 		Title:       data.Title,
 		Description: data.Description,
-		StartDate:   time.Time(data.StartTime),
+		StartTime:   time.Time(data.StartTime),
 	}
 
 	err = h.db.Model(&event).Association("Agenda").Append(&agendaPoint)
