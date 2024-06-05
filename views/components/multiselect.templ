@@ -16,6 +16,7 @@ templ (m Multiselect) UI() {
 	<div
 		class="w-full group relative after:content-[attr(data-count)] after:absolute after:border after:rounded-full after:w-6 after:h-6 after:grid after:place-items-center after:top-1/2 after:-translate-y-1/2 after:text-xs after:bg-secondary after:right-6"
 		data-count="0" id={ "multi-" + randomId }
+        hx-ext="ignore:json-enc"
 	>
 		<input
 			class="p-1 border w-full"
@@ -23,16 +24,19 @@ templ (m Multiselect) UI() {
 			name="search"
 			form="non-existent"
 			placeholder={ m.Placeholder }
-			hx-post={ m.DataUrl }
-			hx-trigger="input changed delay:500ms, search, revealed"
+			hx-get={ m.DataUrl }
+			hx-trigger="input changed delay:500ms, search"
 			hx-target={ "#" + resultsId }
-			hx-ext="ignore:json-enc"
 			hx-include="[name='inputs-name']"
 			hx-swap="innerHTML"
 			autocomplete="off"
 		/>
 		<input hidden value={ m.Name } name="inputs-name"/>
 		<fieldset
+			hx-get={ m.DataUrl }
+			hx-include="[name='inputs-name']"
+            hx-trigger="intersect once"
+			hx-swap="innerHTML"
 			id={ resultsId }
 			class="absolute z-50 bg-white border top-[110%] p-2 pr-4 hidden rounded group-focus-within:grid hover:grid gap-2 max-h-52 min-w-60 overflow-y-scroll"
 		></fieldset>

@@ -69,7 +69,7 @@ func seedEvents(db *gorm.DB, users []*User) {
 			StartDate:   time.Now(),
 			EndDate:     time.Now().Add(time.Hour * 72),
 			Hosts:       []*User{users[random]},
-			Attendees:   []*User{users[random], users[len(users)-1]},
+			Attendees:   []*User{users[random]},
 		}
 
 		events = append(events, &event)

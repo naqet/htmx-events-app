@@ -24,7 +24,7 @@ func NewComponentsHandler(app *chttp.App) {
 
 	route.Use(middlewares.Auth)
 
-	route.Post("/multiselect/all-users", h.users)
+	route.Get("/multiselect/all-users", h.users)
 	route.Get("/agenda/create-point", h.createAgendaPoint)
 }
 
