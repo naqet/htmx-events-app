@@ -29,6 +29,7 @@ func NewEventsHandler(app *chttp.App) {
 	route.Get("/{title}", h.getByTitle)
 	route.Post("/{$}", h.createEvent)
 	route.Post("/{title}/agenda-point", h.createAgendaPoint)
+	route.Post("/{title}/comment", h.addComment)
 }
 
 func (h *eventsHandler) createEventPage(w http.ResponseWriter, r *http.Request) error {
@@ -62,9 +63,18 @@ func (h *eventsHandler) getByTitle(w http.ResponseWriter, r *http.Request) error
 	title := r.PathValue("title")
 
 	var event db.Event
-	err := h.db.Where("title = ?", title).Preload("Hosts").Preload("Agenda", func(tx *gorm.DB) *gorm.DB {
-		return tx.Order("start_time ASC")
-	}).Preload("Attendees").Find(&event).Error
+	err := h.db.
+		Where("title = ?", title).
+		Preload("Hosts").
+		Preload("Agenda", func(tx *gorm.DB) *gorm.DB {
+			return tx.Order("start_time ASC")
+		}).
+		Preload("Attendees").
+		Preload("Comments.From", func(tx *gorm.DB) *gorm.DB {
+			return tx.Order("created_at ASC")
+		}).
+		Find(&event).
+		Error
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return chttp.NotFoundError("Event with such title doesn't exist")
@@ -259,4 +269,56 @@ func (h *eventsHandler) createAgendaPoint(w http.ResponseWriter, r *http.Request
 	}
 
 	return vcomponents.AgendaList(utils.OrganizeAgendaPoints(event.Agenda), isOwner).Render(r.Context(), w)
+}
+
+func (h *eventsHandler) addComment(w http.ResponseWriter, r *http.Request) error {
+	content := r.FormValue("content")
+
+	if content == "" {
+		return chttp.BadRequestError("Content cannot be empty")
+	}
+
+	email, err := utils.GetEmailFromContext(r)
+
+	if err != nil {
+		return err
+	}
+
+	title := r.PathValue("title")
+
+	var event db.Event
+	err = h.db.Preload("Attendees").Where("title = ?", title).First(&event).Error
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return chttp.NotFoundError("Event with such title doesn't exist")
+	} else if err != nil {
+		return err
+	}
+
+	var user *db.User
+	for _, attendee := range event.Attendees {
+		if attendee.Email == email {
+			user = attendee
+			break
+		}
+	}
+
+	if user == nil {
+		return chttp.UnauthorizedError("Only attendee can add comments")
+	}
+
+	comment := db.Comment{
+		FromEmail: email,
+		From:      *user,
+		Content:   content,
+	}
+
+	err = h.db.Model(&event).Association("Comments").Append(&comment)
+
+	if err != nil {
+		return err
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	return vcomponents.Comment(comment).Render(r.Context(), w)
 }

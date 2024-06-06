@@ -39,6 +39,7 @@ type Event struct {
 	Hosts     []*User       `json:"hosts" gorm:"many2many:hosted_events;References:Email"`
 	Attendees []*User       `json:"attendees" gorm:"many2many:attended_events;References:Email"`
 	Agenda    []AgendaPoint `json:"agenda"`
+	Comments  []Comment     `json:"comments"`
 }
 
 type AgendaPoint struct {
@@ -59,4 +60,13 @@ type Invitation struct {
 	Event      Event  `json:"event" gorm:"foreignKey:EventTitle;References:Title"`
 	EventTitle string `json:"eventTitle"`
 	Message    string `json:"message"`
+}
+
+type Comment struct {
+	Base
+	From      User   `json:"from" gorm:"foreignKey:FromEmail;References:Email"`
+	FromEmail string `json:"fromEmail"`
+	Content   string `json:"content"`
+	Event     Event  `json:"event"`
+	EventId   string `json:"eventId"`
 }

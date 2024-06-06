@@ -3,6 +3,7 @@ package vevents;
 import "htmx-events-app/db"
 import "time"
 import "fmt"
+import "htmx-events-app/utils"
 
 func handleHosts(hosts []*db.User) []*db.User {
     if len(hosts) < 3 {
@@ -44,7 +45,7 @@ templ Table(events []db.Event) {
 								<ul class="flex items-center space-x-2">
 									for _, host := range handleHosts(event.Hosts) {
                                         <li class="rounded-full h-8 w-8 grid place-items-center bg-gray-200">
-                                            { getFirstLetter(host.Name) }
+                                            { utils.GetFirstLetter(host.Name) }
                                         </li>
 									}
 								</ul>

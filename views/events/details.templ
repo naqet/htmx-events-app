@@ -9,10 +9,10 @@ import "htmx-events-app/utils"
 templ Details(event db.Event, isOwner bool) {
 	@vlayout.Base() {
 		@vlayout.Header()
-		<div class="p-4 grid gap-4 grid-cols-4">
+		<div class="p-4 grid gap-4 lg:grid-cols-4">
 			<section class="grid gap-2 card content-start">
 				<h1 class="text-4xl font-bold">{ event.Title }</h1>
-				<p class="text-black/70 min-h-32">{ event.Description }</p>
+				<p class="text-black/70 lg:min-h-32">{ event.Description }</p>
 				<ul class="grid gap-2">
 					<li class="grid">
 						Start
@@ -35,7 +35,7 @@ templ Details(event db.Event, isOwner bool) {
 						<ul class="flex gap-2">
 							for _, host := range event.Hosts {
 								<li class="rounded-full h-8 w-8 grid place-items-center bg-gray-200">
-									{ getFirstLetter(host.Name) }
+									{ utils.GetFirstLetter(host.Name) }
 								</li>
 							}
 						</ul>
@@ -48,7 +48,7 @@ templ Details(event db.Event, isOwner bool) {
 					for _, attendee := range event.Attendees {
 						<li class="flex gap-2 items-center">
 							<span class="w-8 h-8 rounded-full bg-gray-200 grid place-items-center">
-								{ getFirstLetter(attendee.Name) }
+								{ utils.GetFirstLetter(attendee.Name) }
 							</span>
 							<div class="grid items-center">
 								{ attendee.Name }
@@ -62,7 +62,7 @@ templ Details(event db.Event, isOwner bool) {
 					</div>
 				}
 			</section>
-			<section class="grid gap-2 h-fit card col-span-2">
+			<section class="grid gap-2 h-fit card lg:col-span-2">
 				<h2 class="font-semibold text-xl">Agenda</h2>
 				<p class="text-black/70">Check out the schedule of events and plan your day.</p>
 				<div id="agendaList" class="[&:not(:last-child)]:border-b [&:not(:last-child)]:pb-4">
@@ -106,9 +106,33 @@ templ Details(event db.Event, isOwner bool) {
 					</dialog>
 				}
 			</section>
-			<section class="card col-span-2">
-				<h2 class="font-semibold text-xl">Travel Arrangements</h2>
+			<section class="card lg:col-span-2 grid gap-2">
+				<h2 class="font-semibold text-xl">Comments</h2>
 				<p class="text-black/70">Check out the schedule of events and plan your day.</p>
+				<hr class="my-2"/>
+				<ul class="grid gap-4 empty:hidden peer" id="comments">
+					for _, comment := range event.Comments {
+						@vcomponents.Comment(comment)
+					}
+				</ul>
+				<p class="hidden text-black/50 peer-empty:block text-center text-xs">No comments</p>
+				<hr class="my-2"/>
+				<form
+					class="flex gap-1 justify-between items-end"
+					hx-post={ "/events/" + event.Title + "/comment" }
+					hx-target="#comments"
+					hx-swap="beforeend"
+					hx-on::after-request="if(event.detail.successful){this.reset()}"
+				>
+					<textarea title="Comment content" name="content" rows="1" class="w-full" required></textarea>
+					<button class="border p-2 rounded-md grid place-items-center">
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4">
+							<path
+								d="M2.87 2.298a.75.75 0 0 0-.812 1.021L3.39 6.624a1 1 0 0 0 .928.626H8.25a.75.75 0 0 1 0 1.5H4.318a1 1 0 0 0-.927.626l-1.333 3.305a.75.75 0 0 0 .811 1.022 24.89 24.89 0 0 0 11.668-5.115.75.75 0 0 0 0-1.175A24.89 24.89 0 0 0 2.869 2.298Z"
+							></path>
+						</svg>
+					</button>
+				</form>
 			</section>
 		</div>
 	}

@@ -35,6 +35,7 @@ func main() {
 	handlers.NewComponentsHandler(app)
 	handlers.NewInvitationsHandler(app)
 	handlers.NewAgendaPointsHandler(app)
+	handlers.NewCommentsHandler(app)
 
 	fmt.Println("Starting server...")
 	err := app.Listen("localhost:3000")

@@ -47,3 +47,11 @@ func OrganizeAgendaPoints(points []db.AgendaPoint) AgendaSections {
 
 	return sections
 }
+
+func GetFirstLetter(name string) string {
+	if len(name) == 0 {
+		return ""
+	}
+	return string(name[0])
+}
+
