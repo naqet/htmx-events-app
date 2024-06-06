@@ -1,0 +1,92 @@
+package vreports;
+
+import "htmx-events-app/views/layout"
+import "htmx-events-app/views/components"
+
+var handlePrices = templ.NewOnceHandle()
+
+//TODO: fix styles on mobile
+templ Base(eventTitle string) {
+@handlePrices.Once() {
+<script type="text/javascript">
+    function calculatePrice() {
+        const totalNode = this.parentElement.parentElement.querySelector("[name='itemTotalAmount']")
+        const priceNode = this.parentElement.parentElement.querySelector("[name='unitPrices']")
+        const quantityNode = this.parentElement.parentElement.querySelector("[name='quantities']")
+
+        if (!totalNode || !priceNode || !quantityNode) return
+
+        totalNode.value = Number(priceNode.value * quantityNode.value).toFixed(2)
+
+        window.dispatchEvent(new Event("calculateTotalPrice"))
+    }
+
+    function calculateTotalPrice() {
+        const totalNode = document.body.querySelector("#total")
+
+        if (!totalNode) return
+
+        const nodes = document.body.querySelectorAll("[name='itemTotalAmount']")
+
+        let value = 0
+        for (const node of nodes) {
+            value += +node.value
+        }
+
+        totalNode.value = value.toFixed(2)
+    }
+
+    window.addEventListener("calculateTotalPrice", calculateTotalPrice)
+
+</script>
+}
+@vlayout.Base() {
+@vlayout.Header()
+<div class="p-4 max-w-5xl mx-auto">
+    <form class="card grid gap-2 overflow-scroll">
+        <div class="flex justify-between">
+            <h1 class="text-lg font-semibold">Add invoice</h1>
+            <div class="grid justify-end">
+                <label class="grid">
+                    Date
+                    <input name="date" type="date" required />
+                </label>
+                <label class="grid">
+                    Vendor
+                    <input name="vendor" required />
+                </label>
+            </div>
+        </div>
+        <hr class="my-2" />
+        <table class="border-collapse">
+            <thead>
+                <tr class="*:font-normal *:text-left">
+                    <th class="w-6/12">Description</th>
+                    <th>Quantity</th>
+                    <th>Unit Price</th>
+                    <th>Total Amount</th>
+                </tr>
+            </thead>
+            <tbody id="items" class="peer">
+                @vcomponents.ReportItem()
+            </tbody>
+            <tfoot>
+                <tr class="border-t">
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td><input disabled id="total" type="number" value="0.00" class="mt-4" /> </td>
+                </tr>
+            </tfoot>
+        </table>
+        <button type="button" class="text-center" hx-get="/components/report/create-item" hx-swap="beforeend"
+            hx-target="#items">
+            + Add Item
+        </button>
+        <button type="button" class="submit-btn justify-self-end">
+            Submit
+        </button>
+    </form>
+</div>
+}
+}

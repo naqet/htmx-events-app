@@ -26,6 +26,11 @@ func NewComponentsHandler(app *chttp.App) {
 
 	route.Get("/multiselect/all-users", h.users)
 	route.Get("/agenda/create-point", h.createAgendaPoint)
+	route.Get("/report/create-item", h.createReportItem)
+}
+
+func (h *componentsHandler) createReportItem(w http.ResponseWriter, r *http.Request) error {
+	return vcomponents.ReportItem().Render(r.Context(), w)
 }
 
 func (h *componentsHandler) createAgendaPoint(w http.ResponseWriter, r *http.Request) error {

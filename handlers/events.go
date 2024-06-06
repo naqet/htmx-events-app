@@ -9,6 +9,7 @@ import (
 	"htmx-events-app/utils"
 	vcomponents "htmx-events-app/views/components"
 	vevents "htmx-events-app/views/events"
+	vreports "htmx-events-app/views/reports"
 	"net/http"
 	"time"
 
@@ -27,9 +28,15 @@ func NewEventsHandler(app *chttp.App) {
 	route.Get("/", h.homePage)
 	route.Get("/create", h.createEventPage)
 	route.Get("/{title}", h.getByTitle)
+    route.Get("/{title}/report", h.reportPage)
 	route.Post("/{$}", h.createEvent)
 	route.Post("/{title}/agenda-point", h.createAgendaPoint)
 	route.Post("/{title}/comment", h.addComment)
+}
+
+func (h *eventsHandler) reportPage(w http.ResponseWriter, r *http.Request) error {
+	title := r.PathValue("title")
+	return vreports.Base(title).Render(r.Context(), w)
 }
 
 func (h *eventsHandler) createEventPage(w http.ResponseWriter, r *http.Request) error {

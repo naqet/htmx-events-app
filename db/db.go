@@ -40,6 +40,8 @@ func Init() *gorm.DB {
         &Invitation{},
         &AgendaPoint{},
         &Comment{},
+        &Invoice{},
+        &InvoiceItem{},
 	)
 
     if seed {

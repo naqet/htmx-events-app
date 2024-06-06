@@ -40,6 +40,7 @@ type Event struct {
 	Attendees []*User       `json:"attendees" gorm:"many2many:attended_events;References:Email"`
 	Agenda    []AgendaPoint `json:"agenda"`
 	Comments  []Comment     `json:"comments"`
+	Invoices  []Invoice     `json:"invoices"`
 }
 
 type AgendaPoint struct {
@@ -69,4 +70,20 @@ type Comment struct {
 	Content   string `json:"content"`
 	Event     Event  `json:"event"`
 	EventId   string `json:"eventId"`
+}
+
+type Invoice struct {
+	Base
+	Date    string        `json:"date"`
+	Vendor  string        `json:"vendor"`
+	Items   []InvoiceItem `json:"items"`
+	EventID string        `json:"eventId"`
+}
+
+type InvoiceItem struct {
+	Base
+	InvoiceID   string  `json:"invoiceId"`
+	Description string  `json:"description"`
+	Quantity    string  `json:"quantity"`
+	UnitPrice   float64 `json:"unitPrice"`
 }
