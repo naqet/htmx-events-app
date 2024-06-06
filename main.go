@@ -36,6 +36,7 @@ func main() {
 	handlers.NewInvitationsHandler(app)
 	handlers.NewAgendaPointsHandler(app)
 
+	fmt.Println("Starting server...")
 	err := app.Listen("localhost:3000")
 	if err != nil && !errors.Is(err, http.ErrServerClosed) {
 		panic(err)
