@@ -46,17 +46,17 @@ type AgendaPoint struct {
 	Title       string    `json:"title"`
 	Description string    `json:"description"`
 	StartTime   time.Time `json:"startTime"`
-	Event       Event
-	EventId     string
+	Event       Event     `json:"event"`
+	EventId     string    `json:"eventId"`
 }
 
 type Invitation struct {
 	Base
-	From       User `gorm:"foreignKey:FromEmail;References:Email"`
-	FromEmail  string
-	To         User `gorm:"foreignKey:ToEmail;References:Email"`
-	ToEmail    string
-	Event      Event `gorm:"foreignKey:EventTitle;References:Title"`
-	EventTitle string
-	Message    string
+	From       User   `json:"from" gorm:"foreignKey:FromEmail;References:Email"`
+	FromEmail  string `json:"fromEmail"`
+	To         User   `json:"to" gorm:"foreignKey:ToEmail;References:Email"`
+	ToEmail    string `json:"toEmail"`
+	Event      Event  `json:"event" gorm:"foreignKey:EventTitle;References:Title"`
+	EventTitle string `json:"eventTitle"`
+	Message    string `json:"message"`
 }
