@@ -43,7 +43,7 @@ templ Base(eventTitle string) {
 @vlayout.Base() {
 @vlayout.Header()
 <div class="p-4 max-w-5xl mx-auto">
-    <form class="card grid gap-2 overflow-scroll">
+    <form class="card grid gap-2 overflow-scroll" hx-post={"/events/" + eventTitle + "/invoice"} hx-ext="json-enc" hx-swap="none" hx-trigger="submit">
         <div class="flex justify-between">
             <h1 class="text-lg font-semibold">Add invoice</h1>
             <div class="grid justify-end">
@@ -83,7 +83,7 @@ templ Base(eventTitle string) {
             hx-target="#items">
             + Add Item
         </button>
-        <button type="button" class="submit-btn justify-self-end">
+        <button class="submit-btn justify-self-end">
             Submit
         </button>
     </form>

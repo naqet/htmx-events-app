@@ -74,7 +74,7 @@ type Comment struct {
 
 type Invoice struct {
 	Base
-	Date    string        `json:"date"`
+	Date    time.Time     `json:"date"`
 	Vendor  string        `json:"vendor"`
 	Items   []InvoiceItem `json:"items"`
 	EventID string        `json:"eventId"`
@@ -84,6 +84,6 @@ type InvoiceItem struct {
 	Base
 	InvoiceID   string  `json:"invoiceId"`
 	Description string  `json:"description"`
-	Quantity    string  `json:"quantity"`
+	Quantity    int     `json:"quantity"`
 	UnitPrice   float64 `json:"unitPrice"`
 }

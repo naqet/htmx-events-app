@@ -28,10 +28,11 @@ func NewEventsHandler(app *chttp.App) {
 	route.Get("/", h.homePage)
 	route.Get("/create", h.createEventPage)
 	route.Get("/{title}", h.getByTitle)
-    route.Get("/{title}/report", h.reportPage)
+	route.Get("/{title}/report", h.reportPage)
 	route.Post("/{$}", h.createEvent)
 	route.Post("/{title}/agenda-point", h.createAgendaPoint)
 	route.Post("/{title}/comment", h.addComment)
+	route.Post("/{title}/invoice", h.addInvoice)
 }
 
 func (h *eventsHandler) reportPage(w http.ResponseWriter, r *http.Request) error {
@@ -328,4 +329,94 @@ func (h *eventsHandler) addComment(w http.ResponseWriter, r *http.Request) error
 
 	w.WriteHeader(http.StatusCreated)
 	return vcomponents.Comment(comment).Render(r.Context(), w)
+}
+
+func (h *eventsHandler) addInvoice(w http.ResponseWriter, r *http.Request) error {
+	type request struct {
+		Date         utils.Time       `json:"title"`
+		Vendor       string           `json:"vendor"`
+		Descriptions utils.StringArr  `json:"descriptions"`
+		Quantities   utils.IntArr     `json:"quantities"`
+		UnitPrices   utils.Float64Arr `json:"unitPrices"`
+	}
+
+	var data request
+
+	err := utils.GetDataFromBody(r.Body, &data)
+
+	if err != nil {
+		return chttp.BadRequestError()
+	}
+
+	title := r.PathValue("title")
+
+	var event db.Event
+	err = h.db.Preload("Hosts").Where("title = ?", title).First(&event).Error
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return chttp.NotFoundError("Event with such title doesn't exist")
+	} else if err != nil {
+		return err
+	}
+
+	email, err := utils.GetEmailFromContext(r)
+
+	if err != nil {
+		return err
+	}
+
+	var isOwner bool
+
+	for _, host := range event.Hosts {
+		if host.Email == email {
+			isOwner = true
+			break
+		}
+	}
+
+	if !isOwner {
+		return chttp.UnauthorizedError("Only event's host can add agenda points")
+	}
+
+	invoiceItems, err := handleInvoiceItems(data.Descriptions, data.Quantities, data.UnitPrices)
+
+	if err != nil {
+		return err
+	}
+
+	invoice := db.Invoice{
+		Date:   time.Time(data.Date),
+		Vendor: data.Vendor,
+		Items:  invoiceItems,
+        EventID: event.ID,
+	}
+
+    err = h.db.Create(&invoice).Error
+
+    if err != nil {
+        return err
+    }
+
+    w.WriteHeader(http.StatusCreated)
+	return nil
+}
+
+func handleInvoiceItems(descriptions []string, quantities []int, unitPrices []float64) ([]db.InvoiceItem, error) {
+	var result []db.InvoiceItem
+
+	if len(quantities) != len(unitPrices) || len(quantities) != len(descriptions) || len(unitPrices) != len(descriptions) {
+		return result, errors.New("Invalid invoice items entries")
+	}
+
+	for i := range len(quantities) {
+		item := db.InvoiceItem{
+			Description: descriptions[i],
+			Quantity:    quantities[i],
+			UnitPrice:   unitPrices[i],
+		}
+
+		result = append(result, item)
+	}
+
+	return result, nil
 }
